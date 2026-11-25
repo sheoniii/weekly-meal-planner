@@ -130,6 +130,7 @@
   .meal .info { flex: 1; min-width: 0; }
   .meal .name { font-weight: 700; }
   .meal .detail { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .meal .detail.warn { color: var(--avoid); font-weight: 700; }
   .meal.none .name { color: var(--muted); font-weight: 400; }
   .meal.delivery { border: 2px dashed var(--pink); }
   .sumline { font-size: 14px; color: var(--muted); margin-bottom: 10px; }
@@ -312,6 +313,7 @@
   <div id="result"></div>
 
   <div class="foot">
+    조건에 딱 맞는 메뉴가 없으면 가장 가까운 메뉴를 추천하고, 못 맞춘 조건은 ⚠️로 알려 드려요.<br>
     의학적·영양학적 식단이 아니에요. 알레르기가 있다면 재료를 꼭 직접 확인해 주세요.
   </div>
 </div>
@@ -452,6 +454,43 @@ MENUS.push(
   { n: "연어 샐러드", m: ["점심", "저녁"], t: 15, g: ["해산물", "생선"], i: [["연어", 60, "g", "고"], ["양상추", 50, "g", "채"], ["방울토마토", 5, "개", "채"]] },
   { n: "연어 아보카도 샐러드", m: ["아침", "점심"], t: 10, g: ["해산물", "생선"], i: [["연어", 50, "g", "고"], ["아보카도", 0.5, "개", "채"], ["양상추", 40, "g", "채"]] }
 );
+// 메뉴 대폭 추가 (f: 이 메뉴의 특징 표시)
+MENUS.push(
+  // 아침
+  { n: "두부 샌드위치", m: ["아침", "점심"], t: 10, g: ["밀가루", "콩류"], i: [["식빵", 2, "장", "곡"], ["두부", 80, "g", "양"], ["오이", 30, "g", "채"], ["양상추", 20, "g", "채"]], f: ["light", "w", "nofire"] },
+  { n: "그릭요거트와 과일", m: ["아침"], t: 5, g: ["유제품"], i: [["요거트", 150, "g", "달"], ["딸기", 5, "개", "채"], ["바나나", 0.5, "개", "채"]], f: ["light", "w", "nofire", "lowsalt"] },
+  { n: "계란 야채죽", m: ["아침"], t: 30, g: ["계란"], i: [["쌀", 50, "g", "곡"], ["계란", 1, "개", "달"], ["당근", 20, "g", "채"], ["애호박", 30, "g", "채"]], f: ["soft", "light", "lowsalt"] },
+  { n: "연두부 달걀찜", m: ["아침", "저녁"], t: 15, g: ["계란", "콩류"], i: [["두부", 100, "g", "양"], ["계란", 2, "개", "달"], ["대파", 10, "g", "채"]], f: ["soft", "light", "protein", "lowsalt"] },
+  { n: "참치 샌드위치", m: ["아침", "점심"], t: 10, g: ["밀가루", "해산물", "생선", "계란"], i: [["식빵", 2, "장", "곡"], ["참치", 40, "g", "고"], ["양상추", 30, "g", "채"], ["마요네즈", 10, "g", "양"]], f: ["w", "protein", "lunchbox"] },
+  { n: "고구마 샐러드", m: ["아침", "점심"], t: 20, g: ["유제품"], i: [["고구마", 150, "g", "채"], ["사과", 0.5, "개", "채"], ["요거트", 50, "g", "달"]], f: ["soft", "w"] },
+  { n: "멸치 국수", m: ["아침", "점심"], t: 20, g: ["밀가루", "해산물", "생선"], i: [["소면", 100, "g", "곡"], ["멸치", 15, "g", "고"], ["애호박", 40, "g", "채"], ["대파", 10, "g", "채"]], f: ["onebowl"] },
+  { n: "닭가슴살 샌드위치", m: ["아침", "점심"], t: 15, g: ["밀가루", "닭고기"], i: [["식빵", 2, "장", "곡"], ["닭가슴살", 80, "g", "고"], ["양상추", 30, "g", "채"], ["방울토마토", 3, "개", "채"]], f: ["w", "protein", "lunchbox"] },
+  { n: "시금치 달걀 스크램블", m: ["아침"], t: 10, g: ["계란"], i: [["계란", 2, "개", "달"], ["시금치", 40, "g", "채"], ["양파", 20, "g", "채"]], f: ["protein", "light", "lowsalt", "soft"] },
+  { n: "매콤 달걀 비빔밥", m: ["아침", "점심"], t: 15, g: ["계란", "콩류"], i: [["쌀", 100, "g", "곡"], ["계란", 1, "개", "달"], ["고추장", 10, "g", "양"], ["김", 1, "장", "양"], ["시금치", 30, "g", "채"]], f: ["spicy", "protein", "onebowl"] },
+  // 점심
+  { n: "참치김치볶음밥", m: ["점심", "저녁"], t: 20, g: ["해산물", "생선", "계란"], i: [["쌀", 100, "g", "곡"], ["김치", 60, "g", "양"], ["참치", 40, "g", "고"], ["계란", 1, "개", "달"]], f: ["spicy", "onebowl", "lunchbox", "protein"] },
+  { n: "닭가슴살 샐러드 덮밥", m: ["점심"], t: 15, g: ["닭고기"], i: [["쌀", 100, "g", "곡"], ["닭가슴살", 80, "g", "고"], ["양상추", 40, "g", "채"], ["방울토마토", 4, "개", "채"]], f: ["onebowl", "protein", "light", "lunchbox"] },
+  { n: "냉모밀", m: ["점심"], t: 15, g: ["밀가루", "콩류"], i: [["모밀면", 1, "팩", "곡"], ["무", 30, "g", "채"], ["쪽파", 10, "g", "채"], ["김", 1, "장", "양"]], f: ["onebowl"] },
+  { n: "카레우동", m: ["점심"], t: 20, g: ["밀가루"], i: [["우동면", 1, "팩", "곡"], ["카레가루", 20, "g", "양"], ["양파", 40, "g", "채"], ["당근", 30, "g", "채"]], f: ["onebowl"] },
+  { n: "치킨마요덮밥", m: ["점심"], t: 20, g: ["닭고기", "계란"], i: [["쌀", 100, "g", "곡"], ["닭가슴살", 100, "g", "고"], ["마요네즈", 15, "g", "양"], ["계란", 1, "개", "달"]], f: ["onebowl", "lunchbox", "protein"] },
+  { n: "불고기 덮밥", m: ["점심"], t: 20, g: ["소고기"], i: [["쌀", 100, "g", "곡"], ["소고기", 80, "g", "고"], ["양파", 40, "g", "채"], ["대파", 10, "g", "채"]], f: ["onebowl", "lunchbox", "protein"] },
+  { n: "새우 볶음 우동", m: ["점심"], t: 20, g: ["밀가루", "해산물", "새우·조개"], i: [["우동면", 1, "팩", "곡"], ["새우", 60, "g", "고"], ["양배추", 50, "g", "채"], ["당근", 20, "g", "채"]], f: ["onebowl"] },
+  { n: "콩국수", m: ["점심"], t: 25, g: ["밀가루", "콩류"], i: [["소면", 100, "g", "곡"], ["두유", 200, "ml", "양"], ["오이", 40, "g", "채"]], f: ["soft", "onebowl"] },
+  { n: "함박 스테이크", m: ["점심", "저녁"], t: 30, g: ["소고기", "돼지고기", "계란"], i: [["소고기", 60, "g", "고"], ["돼지고기", 60, "g", "고"], ["계란", 1, "개", "달"], ["양파", 40, "g", "채"], ["쌀", 100, "g", "곡"]], f: ["protein", "w"] },
+  { n: "집에서 쌀국수", m: ["점심"], t: 25, g: ["소고기"], i: [["쌀국수면", 1, "팩", "곡"], ["소고기", 60, "g", "고"], ["숙주", 50, "g", "채"], ["양파", 30, "g", "채"]], f: ["w", "onebowl"] },
+  { n: "김밥", m: ["점심"], t: 30, g: ["계란", "해산물", "생선"], i: [["쌀", 100, "g", "곡"], ["김", 2, "장", "양"], ["계란", 1, "개", "달"], ["당근", 30, "g", "채"], ["어묵", 30, "g", "고"]], f: ["lunchbox"] },
+  // 저녁
+  { n: "삼겹살 구이와 쌈", m: ["저녁"], t: 25, g: ["돼지고기", "콩류"], i: [["돼지고기", 150, "g", "고"], ["상추", 60, "g", "채"], ["마늘", 10, "g", "채"], ["쌈장", 20, "g", "양"]] },
+  { n: "닭가슴살 카레", m: ["저녁"], t: 30, g: ["닭고기", "밀가루"], i: [["닭가슴살", 100, "g", "고"], ["감자", 60, "g", "채"], ["당근", 30, "g", "채"], ["양파", 40, "g", "채"], ["카레가루", 20, "g", "양"], ["쌀", 100, "g", "곡"]], f: ["onebowl", "protein"] },
+  { n: "고등어 무조림", m: ["저녁"], t: 35, g: ["해산물", "생선"], i: [["고등어", 0.5, "마리", "고"], ["무", 100, "g", "채"], ["양파", 30, "g", "채"], ["쌀", 100, "g", "곡"]], f: ["protein"] },
+  { n: "두부 김치찜", m: ["저녁"], t: 30, g: ["돼지고기", "콩류"], i: [["두부", 150, "g", "양"], ["김치", 100, "g", "양"], ["돼지고기", 50, "g", "고"], ["쌀", 100, "g", "곡"]], f: ["spicy"] },
+  { n: "순살 간장 닭조림", m: ["저녁"], t: 30, g: ["닭고기"], i: [["닭고기", 150, "g", "고"], ["감자", 80, "g", "채"], ["양파", 40, "g", "채"], ["쌀", 100, "g", "곡"]], f: ["protein"] },
+  { n: "쭈꾸미 볶음", m: ["저녁"], t: 30, g: ["해산물", "새우·조개"], i: [["쭈꾸미", 120, "g", "고"], ["양파", 40, "g", "채"], ["양배추", 50, "g", "채"], ["고추장", 20, "g", "양"], ["쌀", 100, "g", "곡"]], f: ["spicy"] },
+  { n: "닭곰탕", m: ["저녁"], t: 60, g: ["닭고기"], i: [["닭고기", 200, "g", "고"], ["대파", 20, "g", "채"], ["마늘", 10, "g", "채"], ["쌀", 100, "g", "곡"]], f: ["soft", "protein"] },
+  { n: "연어 덮밥", m: ["저녁", "점심"], t: 15, g: ["해산물", "생선"], i: [["쌀", 100, "g", "곡"], ["연어", 80, "g", "고"], ["양파", 30, "g", "채"], ["대파", 10, "g", "채"]], f: ["onebowl", "protein"] },
+  { n: "구운 채소 두부 샐러드", m: ["저녁"], t: 20, g: ["콩류"], i: [["두부", 120, "g", "양"], ["가지", 60, "g", "채"], ["파프리카", 40, "g", "채"], ["브로콜리", 40, "g", "채"]], f: ["light", "lowsalt", "protein", "w"] },
+  { n: "닭가슴살 파스타", m: ["저녁"], t: 25, g: ["닭고기", "밀가루"], i: [["스파게티면", 100, "g", "곡"], ["닭가슴살", 80, "g", "고"], ["토마토소스", 80, "g", "양"], ["양파", 30, "g", "채"]], f: ["w", "protein", "onebowl"] }
+);
 // 맞는 메뉴가 없는 끼니가 생기지 않도록, 어울리는 끼니를 더 붙여요
 const MEAL_ADD = {
   아침: ["잔치국수", "우동", "김치볶음밥", "콩나물비빔밥", "참치마요덮밥", "멸치 주먹밥", "유부초밥", "샌드위치"],
@@ -519,14 +558,15 @@ const EXTRA = {
 MENUS.forEach(m => {
   const e = EXTRA[m.n] || {};
   if (e.g) m.g = m.g.concat(e.g);
-  m.spicy = !!e.spicy; m.w = !!e.w;
-  m.light = LIGHT.has(m.n); m.protein = PROTEIN.has(m.n);
+  const f = m.f || [];
+  m.spicy = !!e.spicy || f.includes("spicy"); m.w = !!e.w || f.includes("w");
+  m.light = LIGHT.has(m.n) || f.includes("light"); m.protein = PROTEIN.has(m.n) || f.includes("protein");
   // 저염: 국물·찌개·면 요리와 짠 가공 재료가 들어간 메뉴는 뺌 / 탄수화물 적게: 밥·면·빵·감자류가 없는 메뉴
-  m.lowsalt = LOWSALT.has(m.n) && !m.i.some(x => SALTY.includes(x[0]));
+  m.lowsalt = (LOWSALT.has(m.n) || f.includes("lowsalt")) && !m.i.some(x => SALTY.includes(x[0]));
   m.soup = /국|찌개|탕|전골|우동|국수|수프|죽|스튜/.test(m.n) && !/비빔/.test(m.n);
   m.kid = !m.spicy;
   m.cheap = !m.g.some(t => t === "소고기" || t === "해산물") && m.i.length <= 5;
-  m.soft = SOFT.has(m.n);
+  m.soft = SOFT.has(m.n) || f.includes("soft");
   m.vegan = !m.g.some(t => MEAT.includes(t) || t === "계란" || t === "유제품");
   m.quick15 = m.t <= 15;
   m.lowsugar = !m.i.some(x => SUGARY.includes(x[0])) && !/죽/.test(m.n);
@@ -537,9 +577,10 @@ MENUS.forEach(m => {
   m.spicyfocus = m.spicy;
   m.meatfocus = m.g.some(t => ["돼지고기", "소고기", "닭고기"].includes(t));
   m.westfocus = m.w;
-  m.noodle = m.i.some(x => ["소면", "우동면", "냉면사리", "스파게티면", "당면"].includes(x[0]));
+  m.noodle = m.i.some(x => ["소면", "우동면", "냉면사리", "스파게티면", "당면", "모밀면", "쌀국수면"].includes(x[0]));
   m.rice = m.i.some(x => x[0] === "쌀" || x[0] === "누룽지");
-  m.nofire = NOFIRE.has(m.n); m.lunchbox = LUNCHBOX.has(m.n); m.onebowl = ONEBOWL.has(m.n); m.longcook = m.t >= 30;
+  m.nofire = NOFIRE.has(m.n) || f.includes("nofire"); m.lunchbox = LUNCHBOX.has(m.n) || f.includes("lunchbox");
+  m.onebowl = ONEBOWL.has(m.n) || f.includes("onebowl"); m.longcook = m.t >= 30;
   m.lowcarb = !m.i.some(x => x[3] === "곡" || x[0] === "감자" || x[0] === "고구마");
   // 고혈압 참고: 저염 + 치즈·드레싱·소스류 제외 / 콜레스테롤 참고: 계란, 새우·오징어·조개, 돼지·소고기, 베이컨·치즈·마요네즈 제외
   m.bp = m.lowsalt && !m.i.some(x => ["치즈", "드레싱", "토마토소스", "카레가루"].includes(x[0]));
@@ -673,23 +714,38 @@ Object.entries({
   "김밥·주먹밥": { rice: 1 }, "돈까스·덮밥": { rice: 1 }, "국밥(돼지·순대)": { rice: 1 }, "설렁탕·곰탕": { rice: 1, lowfat: 1 }, "한식 도시락": { rice: 1 }
 }).forEach(([n, o]) => Object.assign(DBY[n].ok, o));
 const DIET_KEYS = ["light", "protein", "lowsalt", "lowcarb", "bp", "chol", "soft", "kid", "cheap", "lowsugar", "lowfat", "manyveg", "noodle", "rice"];
-function deliveryAllowed(d) {
+const D_IGNORE = ["quick", "quick15", "simple", "nofire", "lunchbox", "onebowl", "longcook"]; // 배달에는 해당 없는 조건
+function dSoftOk(d, k) {
+  switch (k) {
+    case "korean": return !d.w;
+    case "soup": return !!d.soup;
+    case "nosoup": return !d.soup;
+    case "seafood": return d.g.includes("해산물") || d.g.includes("생선");
+    case "calcium": return d.g.includes("유제품");
+    case "spicyfocus": return !!d.spicy;
+    case "meatfocus": return d.g.some(t => ["돼지고기", "소고기", "닭고기"].includes(t));
+    case "westfocus": return !!d.w;
+    default: return !!d.ok[k];
+  }
+}
+function dHardOk(d) {
   if (d.g.some(t => state.avoid.includes(t))) return false;
   if (state.veg && d.g.some(t => MEAT.includes(t))) return false;
   if (state.vegan && d.g.some(t => MEAT.includes(t) || t === "계란" || t === "유제품")) return false;
   if (state.mild && d.spicy) return false;
-  if (state.korean && d.w) return false;
-  if (state.soup && !d.soup) return false;
-  if (state.nosoup && d.soup) return false;
-  if (state.seafood && !(d.g.includes("해산물") || d.g.includes("생선"))) return false;
-  if (state.calcium && !d.g.includes("유제품")) return false;
-  if (state.spicyfocus && !d.spicy) return false;
-  if (state.meatfocus && !d.g.some(t => ["돼지고기", "소고기", "닭고기"].includes(t))) return false;
-  if (state.westfocus && !d.w) return false;
-  return DIET_KEYS.every(k => !state[k] || d.ok[k]);
+  return true;
+}
+const dSoftOn = () => softOn().filter(k => !D_IGNORE.includes(k));
+const dMissed = d => dSoftOn().filter(k => !dSoftOk(d, k));
+function deliveryPool() {
+  const base = DELIVERY.filter(dHardOk);
+  if (!base.length) return [];
+  const on = dSoftOn();
+  const exact = base.filter(d => on.every(k => dSoftOk(d, k)));
+  return exact.length ? exact : nearest(base, dSoftOk, on);
 }
 function pickDelivery(used) {
-  const p = DELIVERY.filter(deliveryAllowed);
+  const p = deliveryPool();
   if (!p.length) return null;
   const c = p.filter(d => !used.has("@" + d.n));
   return rand(c.length ? c : p);
@@ -709,31 +765,40 @@ function deliverySlots() {
 }
 
 // ---------- 식단 만들기 ----------
-function allowed(m) {
+// 절대 지키는 조건(못 먹는 재료, 채식, 비건, 매운 음식 빼기)과
+// 딱 맞는 메뉴가 없을 때 가장 가까운 메뉴로 대신하는 조건(점수가 높을수록 끝까지 지켜요)으로 나눠요
+const SOFT_W = { lowsalt: 10, bp: 10, chol: 9, lowsugar: 8, soft: 7, kid: 7, lowcarb: 6, lowfat: 5, light: 5, protein: 5, korean: 4, seafood: 4,
+  nosoup: 3, soup: 3, cheap: 3, quick15: 3, quick: 3, manyveg: 3, calcium: 3, simple: 2, spicyfocus: 2, meatfocus: 2, westfocus: 2, noodle: 2, rice: 2,
+  nofire: 2, lunchbox: 2, onebowl: 2, longcook: 1 };
+const softOn = () => Object.keys(SOFT_W).filter(k => state[k]);
+function softOk(m, k) {
+  if (k === "quick") return m.t <= 30;
+  if (k === "simple") return m.i.length <= 4;
+  if (k === "korean") return !m.w;
+  if (k === "nosoup") return !m.soup;
+  return !!m[k];
+}
+function hardOk(m) {
   if (m.g.some(t => state.avoid.includes(t))) return false;
   if (state.veg && m.g.some(t => MEAT.includes(t))) return false;
-  if (state.quick && m.t > 30) return false;
-  if (state.mild && m.spicy) return false;
-  if (state.korean && m.w) return false;
-  if (state.simple && m.i.length > 4) return false;
-  if (state.light && !m.light) return false;
-  if (state.protein && !m.protein) return false;
-  if (state.lowsalt && !m.lowsalt) return false;
-  if (state.lowcarb && !m.lowcarb) return false;
-  if (state.bp && !m.bp) return false;
-  if (state.chol && !m.chol) return false;
-  if (state.quick15 && !m.quick15) return false;
-  if (state.nosoup && m.soup) return false;
-  if (state.soup && !m.soup) return false;
-  if (state.cheap && !m.cheap) return false;
   if (state.vegan && !m.vegan) return false;
-  if (state.soft && !m.soft) return false;
-  if (state.kid && !m.kid) return false;
-  for (const k of NEW_KEYS) if (state[k] && !m[k]) return false;
+  if (state.mild && m.spicy) return false;
   if (state.avoid.some(a => AVOID_ING[a] && m.i.some(x => AVOID_ING[a].includes(x[0])))) return false;
   return true;
 }
-const pool = meal => MENUS.filter(m => m.m.includes(meal) && allowed(m));
+const missedOf = m => softOn().filter(k => !softOk(m, k));
+function nearest(list, ok, on) {
+  const score = x => on.reduce((s, k) => s + (ok(x, k) ? SOFT_W[k] : 0), 0);
+  const best = Math.max(...list.map(score));
+  return list.filter(x => score(x) >= best - 2); // 비슷한 점수도 섞어서 다양하게
+}
+function pool(meal) {
+  const base = MENUS.filter(m => m.m.includes(meal) && hardOk(m));
+  if (!base.length) return [];
+  const on = softOn();
+  const exact = base.filter(m => on.every(k => softOk(m, k)));
+  return exact.length ? exact : nearest(base, softOk, on);
+}
 const rand = arr => arr[Math.floor(Math.random() * arr.length)];
 
 function usedNames() {
@@ -780,7 +845,7 @@ function swap(di, meal) {
   const cur = state.week[di][meal];
   const used = usedNames();
   if (cur && cur[0] === "@") {
-    const p = DELIVERY.filter(d => deliveryAllowed(d) && "@" + d.n !== cur);
+    const p = deliveryPool().filter(d => "@" + d.n !== cur);
     if (!p.length) { toast("바꿀 다른 배달 메뉴가 없어요"); return; }
     const c = p.filter(d => !used.has("@" + d.n));
     state.week[di][meal] = "@" + rand(c.length ? c : p).n; save(); render(); return;
@@ -859,15 +924,23 @@ function render() {
       const n = document.createElement("div"); n.className = "name";
       n.textContent = dv ? "🛵 " + dv.n + " 배달·외식" : m ? m.n : "맞는 메뉴가 없어요 😢";
       info.appendChild(n);
+      const warn = list => {
+        if (!list.length) return;
+        const w = document.createElement("div"); w.className = "detail warn";
+        w.textContent = "⚠️ 못 맞춘 조건: " + list.map(k => optLabel(k)).join(", ");
+        info.appendChild(w);
+      };
       if (dv) {
         const de = document.createElement("div"); de.className = "detail";
         de.textContent = "요리 없이 시켜 먹는 날 · 장보기 목록에는 안 들어가요";
         info.appendChild(de);
+        warn(dMissed(dv));
       }
       if (m) {
         const de = document.createElement("div"); de.className = "detail";
         de.textContent = `⏱️ ${m.t}분 · ${m.i.slice(0, 4).map(x => x[0]).join(", ")}`;
         info.appendChild(de);
+        warn(missedOf(m));
       }
       row.append(b, info);
       if (m || dv) {
