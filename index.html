@@ -142,6 +142,8 @@
         <label class="chip"><input type="checkbox" id="protein"><span>💪 단백질 위주</span></label>
         <label class="chip"><input type="checkbox" id="lowsalt"><span>🧂 저염</span></label>
         <label class="chip"><input type="checkbox" id="lowcarb"><span>🍞 탄수화물 적게</span></label>
+        <label class="chip"><input type="checkbox" id="bp"><span>🩺 고혈압 참고</span></label>
+        <label class="chip"><input type="checkbox" id="chol"><span>🩺 콜레스테롤 참고</span></label>
         <label class="chip"><input type="checkbox" id="veg"><span>🥬 채식 위주</span></label>
         <label class="chip"><input type="checkbox" id="quick"><span>⏱️ 30분 이하만</span></label>
         <label class="chip"><input type="checkbox" id="mild"><span>🌶️ 매운 음식 빼기</span></label>
@@ -152,6 +154,7 @@
       <div class="note">재료 적은 메뉴는 필요한 재료가 4가지 이하인 메뉴예요.</div>
       <div class="note">가벼운 식단과 단백질 위주는 메뉴를 재료 기준으로 나눈 참고용 분류예요. 칼로리와 영양 수치는 계산하지 않았어요.</div>
       <div class="note">저염은 국·찌개·면 요리와 김치, 된장, 어묵 같은 짠 재료가 든 메뉴를 빼요. 탄수화물 적게는 밥, 면, 빵, 감자류가 없는 메뉴만 골라요. 실제 나트륨과 탄수화물 양은 계산하지 않았어요.</div>
+      <div class="note">🩺 고혈압 참고는 저염 메뉴에서 치즈, 소스류까지 더 뺀 메뉴예요. 콜레스테롤 참고는 계란, 새우·오징어·조개, 돼지고기, 소고기, 베이컨, 치즈, 마요네즈가 든 메뉴를 뺀 메뉴예요. <b>치료용 식단이 아니라 재료 기준의 참고용이에요.</b> 질환이 있다면 의사나 영양사와 상의해서 정해 주세요.</div>
     </div>
     <button class="main" id="make">식단 짜기 🍽️</button>
   </div>
@@ -272,6 +275,9 @@ MENUS.forEach(m => {
   // 저염: 국물·찌개·면 요리와 짠 가공 재료가 들어간 메뉴는 뺌 / 탄수화물 적게: 밥·면·빵·감자류가 없는 메뉴
   m.lowsalt = !/국|찌개|탕|우동|국수/.test(m.n) && !m.i.some(x => SALTY.includes(x[0]));
   m.lowcarb = !m.i.some(x => x[3] === "곡" || x[0] === "감자" || x[0] === "고구마");
+  // 고혈압 참고: 저염 + 치즈·드레싱·소스류 제외 / 콜레스테롤 참고: 계란, 새우·오징어·조개, 돼지·소고기, 베이컨·치즈·마요네즈 제외
+  m.bp = m.lowsalt && !m.i.some(x => ["치즈", "드레싱", "토마토소스", "카레가루"].includes(x[0]));
+  m.chol = !m.g.some(t => ["계란", "돼지고기", "소고기", "새우·조개"].includes(t)) && !m.i.some(x => ["베이컨", "치즈", "마요네즈"].includes(x[0]));
 });
 const BY_NAME = Object.fromEntries(MENUS.map(m => [m.n, m]));
 
@@ -281,7 +287,7 @@ const pad = n => String(n).padStart(2, "0");
 const toISO = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 const fmtDate = iso => { const [y, m, d] = iso.split("-").map(Number); return `${m}/${d} (${days[new Date(y, m - 1, d).getDay()]})`; };
 
-let state = { people: 2, meals: ["아침", "점심", "저녁"], theme: "pink", avoid: [], veg: false, quick: false, mild: false, korean: false, simple: false, light: false, protein: false, lowsalt: false, lowcarb: false, week: null, checked: {} };
+let state = { people: 2, meals: ["아침", "점심", "저녁"], theme: "pink", avoid: [], veg: false, quick: false, mild: false, korean: false, simple: false, light: false, protein: false, lowsalt: false, lowcarb: false, bp: false, chol: false, week: null, checked: {} };
 try {
   const s = JSON.parse(localStorage.getItem(KEY));
   if (s && typeof s === "object") state = Object.assign(state, s);
@@ -327,7 +333,7 @@ AVOID.forEach(a => makeChip($("avoidChips"), LABEL[a] || a, state.avoid.includes
   state.avoid = on ? [...state.avoid, a] : state.avoid.filter(x => x !== a); save();
 }, "avoid"));
 $("veg").checked = state.veg; $("quick").checked = state.quick;
-["veg", "quick", "mild", "korean", "simple", "light", "protein", "lowsalt", "lowcarb"].forEach(k => {
+["veg", "quick", "mild", "korean", "simple", "light", "protein", "lowsalt", "lowcarb", "bp", "chol"].forEach(k => {
   $(k).checked = !!state[k];
   $(k).addEventListener("change", e => { state[k] = e.target.checked; save(); });
 });
@@ -345,6 +351,8 @@ function allowed(m) {
   if (state.protein && !m.protein) return false;
   if (state.lowsalt && !m.lowsalt) return false;
   if (state.lowcarb && !m.lowcarb) return false;
+  if (state.bp && !m.bp) return false;
+  if (state.chol && !m.chol) return false;
   return true;
 }
 const pool = meal => MENUS.filter(m => m.m.includes(meal) && allowed(m));
@@ -429,7 +437,13 @@ function render() {
 
   const plan = document.createElement("div"); plan.className = "card";
   const h = document.createElement("h2"); h.textContent = `🗓️ 일주일 식단 (${state.people}명 기준)`;
-  plan.append(h, bar);
+  plan.append(h);
+  if (state.bp || state.chol) {
+    const w = document.createElement("div"); w.className = "note";
+    w.textContent = "⚠️ 이 식단은 질환 치료용이 아니에요. 재료 기준의 참고용이니, 질환이 있다면 의사나 영양사와 상의해서 정해 주세요.";
+    plan.append(w);
+  }
+  plan.append(bar);
 
   const today = toISO(new Date());
   state.week.forEach((d, di) => {
