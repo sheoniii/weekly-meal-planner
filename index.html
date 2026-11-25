@@ -162,7 +162,8 @@
     background: linear-gradient(90deg, var(--pink-dark), var(--pink)); -webkit-background-clip: text; background-clip: text;
     color: transparent; -webkit-text-fill-color: transparent;
   }
-  .hero .tag { margin: 6px 0 14px; color: var(--muted); font-size: 15px; }
+  .hero .tag { margin: 6px 0 0; color: var(--muted); font-size: 15px; }
+  .hero { padding-bottom: 22px; }
   .stats { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; }
   .stats span {
     background: var(--soft); border: 2px solid var(--pink-soft); border-radius: var(--r3); padding: 5px 12px;
@@ -213,11 +214,6 @@
     <div class="emojis" aria-hidden="true"><span>🍙</span><span>🥗</span><span>🍲</span><span>🍳</span><span>🥑</span></div>
     <h1>일주일 식단표</h1>
     <p class="tag">조건만 고르면 식단 완성!</p>
-    <div class="stats">
-      <span>🍽️ 메뉴 <b id="menuCount">90</b>가지</span>
-      <span>🛵 배달도 OK</span>
-      <span>🛒 장보기 목록</span>
-    </div>
   </header>
 
   <div class="card">
@@ -989,7 +985,6 @@ $("modal").addEventListener("click", e => { if (e.target === $("modal")) closeMo
 document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
 renderPickers();
 
-$("menuCount").textContent = MENUS.length;
 $("make").addEventListener("click", makeWeek);
 render();
 </script>
