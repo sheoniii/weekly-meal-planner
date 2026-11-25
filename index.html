@@ -131,6 +131,8 @@
   .meal .name { font-weight: 700; }
   .meal .detail { font-size: 12px; color: var(--muted); margin-top: 2px; }
   .meal.none .name { color: var(--muted); font-weight: 400; }
+  .meal.delivery { border: 2px dashed var(--pink); }
+  .sumline { font-size: 14px; color: var(--muted); margin-bottom: 10px; }
   button.swap { border: 0; background: transparent; font-size: 20px; cursor: pointer; padding: 4px; }
   .shop h4 { margin: 12px 0 6px; font-size: 15px; color: var(--pink-dark); }
   .shop label { display: flex; align-items: center; gap: 10px; padding: 6px 4px; cursor: pointer; }
@@ -166,6 +168,12 @@
     <div class="field">
       <span class="label">끼니 선택</span>
       <div class="chips" id="mealChips"></div>
+    </div>
+    <div class="field">
+      <span class="label">배달·외식은 일주일에 몇 번? (나머지는 직접 해먹기)</span>
+      <select id="delivery"></select>
+      <div class="chips" id="deliveryMeal" style="margin-top:8px"></div>
+      <div class="note">정한 횟수만큼 배달·외식 메뉴를 추천해요. 배달 끼니는 장보기 목록에 들어가지 않아요. 고른 끼니가 없으면 선택한 첫 끼니로 해요.</div>
     </div>
     <div class="field">
       <span class="label">못 먹는 재료 (골라 주세요)</span>
@@ -323,7 +331,7 @@ const pad = n => String(n).padStart(2, "0");
 const toISO = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 const fmtDate = iso => { const [y, m, d] = iso.split("-").map(Number); return `${m}/${d} (${days[new Date(y, m - 1, d).getDay()]})`; };
 
-let state = { people: 2, meals: ["아침", "점심", "저녁"], theme: "pink", avoid: [], veg: false, quick: false, mild: false, korean: false, simple: false, light: false, protein: false, lowsalt: false, lowcarb: false, bp: false, chol: false, week: null, checked: {} };
+let state = { people: 2, meals: ["아침", "점심", "저녁"], theme: "pink", avoid: [], veg: false, quick: false, mild: false, korean: false, simple: false, light: false, protein: false, lowsalt: false, lowcarb: false, bp: false, chol: false, delivery: 0, deliveryMeal: "저녁", week: null, checked: {} };
 try {
   const s = JSON.parse(localStorage.getItem(KEY));
   if (s && typeof s === "object") state = Object.assign(state, s);
@@ -380,6 +388,62 @@ $("veg").checked = state.veg; $("quick").checked = state.quick;
   $(k).addEventListener("change", e => { state[k] = e.target.checked; save(); });
 });
 $("people").addEventListener("change", e => { state.people = Number(e.target.value); save(); render(); });
+for (let i = 0; i <= 7; i++) { const o = document.createElement("option"); o.value = i; o.textContent = i === 0 ? "없음 (모두 직접 해먹기)" : i + "번"; $("delivery").appendChild(o); }
+$("delivery").value = state.delivery;
+$("delivery").addEventListener("change", e => { state.delivery = Number(e.target.value); save(); });
+MEALS.forEach(m => {
+  const l = document.createElement("label"); l.className = "chip";
+  const i = document.createElement("input"); i.type = "radio"; i.name = "dmeal"; i.value = m; i.checked = state.deliveryMeal === m;
+  const s = document.createElement("span"); s.textContent = m + "에 배달";
+  i.addEventListener("change", () => { state.deliveryMeal = m; save(); });
+  l.append(i, s); $("deliveryMeal").appendChild(l);
+});
+
+// ---------- 배달·외식 ----------
+// ok: 옵션별로 이 배달 메뉴를 써도 되는지 (참고용 분류)
+const DELIVERY = [
+  { n: "치킨", g: ["닭고기"], ok: { protein: 1 } },
+  { n: "피자", g: ["밀가루", "유제품", "돼지고기"], w: 1, ok: {} },
+  { n: "족발·보쌈", g: ["돼지고기"], ok: { protein: 1, lowcarb: 1 } },
+  { n: "짜장면·탕수육", g: ["밀가루", "돼지고기", "계란", "콩류"], ok: {} },
+  { n: "분식(떡볶이·김밥)", g: ["밀가루", "계란", "해산물", "생선"], spicy: 1, ok: {} },
+  { n: "햄버거", g: ["소고기", "밀가루", "유제품", "계란"], w: 1, ok: { protein: 1 } },
+  { n: "초밥·회", g: ["해산물", "생선"], ok: { protein: 1, light: 1, lowcarb: 1 } },
+  { n: "샐러드·포케", g: [], w: 1, ok: { light: 1, protein: 1, lowsalt: 1, lowcarb: 1, bp: 1, chol: 1 } },
+  { n: "야채죽", g: [], ok: { light: 1, lowsalt: 1, bp: 1, chol: 1 } },
+  { n: "국밥", g: ["돼지고기", "콩류"], ok: { protein: 1 } },
+  { n: "찜닭", g: ["닭고기", "콩류"], spicy: 1, ok: { protein: 1 } },
+  { n: "한식 도시락", g: ["돼지고기", "계란", "콩류"], ok: { protein: 1 } },
+  { n: "쌀국수", g: ["소고기"], w: 1, ok: {} }
+];
+const DBY = Object.fromEntries(DELIVERY.map(d => [d.n, d]));
+const DIET_KEYS = ["light", "protein", "lowsalt", "lowcarb", "bp", "chol"];
+function deliveryAllowed(d) {
+  if (d.g.some(t => state.avoid.includes(t))) return false;
+  if (state.veg && d.g.some(t => MEAT.includes(t))) return false;
+  if (state.mild && d.spicy) return false;
+  if (state.korean && d.w) return false;
+  return DIET_KEYS.every(k => !state[k] || d.ok[k]);
+}
+function pickDelivery(used) {
+  const p = DELIVERY.filter(deliveryAllowed);
+  if (!p.length) return null;
+  const c = p.filter(d => !used.has("@" + d.n));
+  return rand(c.length ? c : p);
+}
+function deliverySlots() {
+  const n = Math.min(Number(state.delivery) || 0, 7);
+  if (!n || !state.meals.length) return { meal: null, days: new Set() };
+  const meal = state.meals.includes(state.deliveryMeal) ? state.deliveryMeal : state.meals[0];
+  let best = null;
+  for (let t = 0; t < 30; t++) {
+    const days = [0, 1, 2, 3, 4, 5, 6].sort(() => Math.random() - 0.5).slice(0, n).sort((a, b) => a - b);
+    const adj = days.filter((x, i) => i && x - days[i - 1] === 1).length;
+    if (!best || adj < best.adj) best = { days, adj };
+    if (!adj) break;
+  }
+  return { meal, days: new Set(best.days) };
+}
 
 // ---------- 식단 만들기 ----------
 function allowed(m) {
@@ -422,10 +486,15 @@ function pick(meal, used, last) {
 function makeWeek() {
   const used = new Set(), last = {}, week = [];
   const start = new Date();
+  const slots = deliverySlots();
   for (let i = 0; i < 7; i++) {
     const d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
     const row = { date: toISO(d) };
     state.meals.forEach(meal => {
+      if (meal === slots.meal && slots.days.has(i)) {
+        const dv = pickDelivery(used);
+        if (dv) { row[meal] = "@" + dv.n; used.add("@" + dv.n); return; }
+      }
       const m = pick(meal, used, last[meal]);
       row[meal] = m ? m.n : null;
       if (m) { used.add(m.n); last[meal] = m; }
@@ -438,6 +507,12 @@ function makeWeek() {
 function swap(di, meal) {
   const cur = state.week[di][meal];
   const used = usedNames();
+  if (cur && cur[0] === "@") {
+    const p = DELIVERY.filter(d => deliveryAllowed(d) && "@" + d.n !== cur);
+    if (!p.length) { toast("바꿀 다른 배달 메뉴가 없어요"); return; }
+    const c = p.filter(d => !used.has("@" + d.n));
+    state.week[di][meal] = "@" + rand(c.length ? c : p).n; save(); render(); return;
+  }
   const p = pool(meal).filter(m => m.n !== cur);
   let c = p.filter(m => !used.has(m.n));
   if (!c.length) c = p;
@@ -480,6 +555,11 @@ function render() {
   const plan = document.createElement("div"); plan.className = "card";
   const h = document.createElement("h2"); h.textContent = `🗓️ 일주일 식단 (${state.people}명 기준)`;
   plan.append(h);
+  let dn = 0, cn = 0;
+  state.week.forEach(d => state.meals.forEach(m => { if (d[m]) { if (d[m][0] === "@") dn++; else cn++; } }));
+  const sum = document.createElement("div"); sum.className = "sumline";
+  sum.textContent = `🍳 직접 해먹기 ${cn}끼 · 🛵 배달·외식 ${dn}끼`;
+  plan.append(sum);
   if (state.bp || state.chol) {
     const w = document.createElement("div"); w.className = "note";
     w.textContent = "⚠️ 이 식단은 질환 치료용이 아니에요. 재료 기준의 참고용이니, 질환이 있다면 의사나 영양사와 상의해서 정해 주세요.";
@@ -499,20 +579,26 @@ function render() {
     }
     state.meals.forEach(meal => {
       const row = document.createElement("div");
-      const m = d[meal] && BY_NAME[d[meal]];
-      row.className = "meal" + (m ? "" : " none");
+      const dv = d[meal] && d[meal][0] === "@" ? DBY[d[meal].slice(1)] : null;
+      const m = dv ? null : d[meal] && BY_NAME[d[meal]];
+      row.className = "meal" + (m || dv ? "" : " none") + (dv ? " delivery" : "");
       const b = document.createElement("div"); b.className = "badge"; b.textContent = meal;
       const info = document.createElement("div"); info.className = "info";
       const n = document.createElement("div"); n.className = "name";
-      n.textContent = m ? m.n : "맞는 메뉴가 없어요 😢";
+      n.textContent = dv ? "🛵 " + dv.n + " 배달·외식" : m ? m.n : "맞는 메뉴가 없어요 😢";
       info.appendChild(n);
+      if (dv) {
+        const de = document.createElement("div"); de.className = "detail";
+        de.textContent = "요리 없이 시켜 먹는 날 · 장보기 목록에는 안 들어가요";
+        info.appendChild(de);
+      }
       if (m) {
         const de = document.createElement("div"); de.className = "detail";
         de.textContent = `⏱️ ${m.t}분 · ${m.i.slice(0, 4).map(x => x[0]).join(", ")}`;
         info.appendChild(de);
       }
       row.append(b, info);
-      if (m) {
+      if (m || dv) {
         const s = document.createElement("button"); s.className = "swap"; s.title = "다른 메뉴로 바꾸기"; s.textContent = "🔄";
         s.addEventListener("click", () => swap(di, meal));
         row.appendChild(s);
@@ -553,7 +639,7 @@ function copyText() {
   const lines = [`[일주일 식단표 · ${state.people}명 기준]`];
   state.week.forEach(d => {
     lines.push("", fmtDate(d.date));
-    state.meals.forEach(m => lines.push(`- ${m}: ${d[m] || "(없음)"}`));
+    state.meals.forEach(m => lines.push(`- ${m}: ${d[m] ? (d[m][0] === "@" ? "(배달·외식) " + d[m].slice(1) : d[m]) : "(없음)"}`));
   });
   lines.push("", "[장보기 목록]");
   const list = shopping();
