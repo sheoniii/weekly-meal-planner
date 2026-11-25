@@ -107,8 +107,12 @@
       <div class="chips">
         <label class="chip"><input type="checkbox" id="veg"><span>🥬 채식 위주</span></label>
         <label class="chip"><input type="checkbox" id="quick"><span>⏱️ 30분 이하만</span></label>
+        <label class="chip"><input type="checkbox" id="mild"><span>🌶️ 매운 음식 빼기</span></label>
+        <label class="chip"><input type="checkbox" id="korean"><span>🍚 한식만</span></label>
+        <label class="chip"><input type="checkbox" id="simple"><span>🛒 재료 적은 메뉴만</span></label>
       </div>
       <div class="note">채식 위주는 고기와 해산물만 빼요. 김치나 양념에 젓갈이 들어갈 수 있어요.</div>
+      <div class="note">재료 적은 메뉴는 필요한 재료가 4가지 이하인 메뉴예요.</div>
     </div>
     <button class="main" id="make">식단 짜기 🍽️</button>
   </div>
@@ -124,7 +128,8 @@
 <script>
 const KEY = "pink-meal-v1";
 const MEALS = ["아침", "점심", "저녁"];
-const AVOID = ["돼지고기", "소고기", "닭고기", "해산물", "계란", "유제품"];
+const AVOID = ["돼지고기", "소고기", "닭고기", "해산물", "생선", "새우·조개", "계란", "유제품", "밀가루", "콩류"];
+const LABEL = { 해산물: "해산물 전부", 생선: "생선", "새우·조개": "새우·조개·오징어", 밀가루: "밀가루(면·빵)", 콩류: "콩·두부·된장" };
 const MEAT = ["돼지고기", "소고기", "닭고기", "해산물"];
 const CAT = { 채: "채소·과일", 고: "고기·해산물", 달: "달걀·유제품", 곡: "곡물·면·빵", 양: "두부·가공·양념" };
 const CAT_ORDER = ["채", "고", "달", "곡", "양"];
@@ -175,6 +180,25 @@ const MENUS = [
   { n: "소고기무국", m: ["저녁"], t: 40, g: ["소고기"], i: [["소고기", 60, "g", "고"], ["무", 100, "g", "채"], ["쌀", 100, "g", "곡"]] },
   { n: "버섯덮밥", m: ["저녁"], t: 20, g: [], i: [["쌀", 100, "g", "곡"], ["버섯", 60, "g", "채"], ["양파", 40, "g", "채"]] }
 ];
+// 추가 정보: g 추가 분류, spicy 매운 음식, w 양식(한식 아님)
+const EXTRA = {
+  "계란토스트": { g: ["밀가루"], w: 1 }, "요거트볼": { w: 1 }, "시리얼과 우유": { g: ["밀가루"], w: 1 },
+  "감자수프와 빵": { g: ["밀가루"], w: 1 }, "바나나 오트밀": { w: 1 }, "된장국과 밥": { g: ["콩류"] },
+  "김치볶음밥": { spicy: 1 }, "비빔국수": { spicy: 1, g: ["밀가루"] }, "참치마요덮밥": { g: ["생선"] },
+  "잔치국수": { g: ["밀가루"] }, "닭가슴살 샐러드": { w: 1 }, "우동": { g: ["밀가루", "생선"] },
+  "카레라이스": { g: ["밀가루"] }, "콩나물비빔밥": { spicy: 1, g: ["콩류"] }, "유부초밥": { g: ["콩류"] },
+  "떡만둣국": { g: ["밀가루"] }, "새우볶음밥": { g: ["새우·조개"] }, "샌드위치": { g: ["밀가루"], w: 1 },
+  "제육볶음": { spicy: 1 }, "된장찌개": { g: ["콩류"] }, "김치찌개": { spicy: 1, g: ["콩류"] },
+  "닭볶음탕": { spicy: 1 }, "고등어구이": { g: ["생선"] }, "두부조림": { g: ["콩류"] },
+  "오징어볶음": { spicy: 1, g: ["새우·조개"] }, "순두부찌개": { spicy: 1, g: ["콩류", "새우·조개"] },
+  "닭갈비": { spicy: 1 }, "비빔밥": { spicy: 1, g: ["콩류"] }, "두부김치": { spicy: 1, g: ["콩류"] },
+  "토마토파스타": { g: ["밀가루"], w: 1 }, "크림파스타": { g: ["밀가루"], w: 1 }, "어묵탕": { g: ["생선", "밀가루"] }
+};
+MENUS.forEach(m => {
+  const e = EXTRA[m.n] || {};
+  if (e.g) m.g = m.g.concat(e.g);
+  m.spicy = !!e.spicy; m.w = !!e.w;
+});
 const BY_NAME = Object.fromEntries(MENUS.map(m => [m.n, m]));
 
 const $ = id => document.getElementById(id);
@@ -183,7 +207,7 @@ const pad = n => String(n).padStart(2, "0");
 const toISO = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 const fmtDate = iso => { const [y, m, d] = iso.split("-").map(Number); return `${m}/${d} (${days[new Date(y, m - 1, d).getDay()]})`; };
 
-let state = { people: 2, meals: ["아침", "점심", "저녁"], avoid: [], veg: false, quick: false, week: null, checked: {} };
+let state = { people: 2, meals: ["아침", "점심", "저녁"], avoid: [], veg: false, quick: false, mild: false, korean: false, simple: false, week: null, checked: {} };
 try {
   const s = JSON.parse(localStorage.getItem(KEY));
   if (s && typeof s === "object") state = Object.assign(state, s);
@@ -210,12 +234,14 @@ MEALS.forEach(m => makeChip($("mealChips"), m, state.meals.includes(m), on => {
   state.meals = on ? MEALS.filter(x => state.meals.includes(x) || x === m) : state.meals.filter(x => x !== m);
   save();
 }));
-AVOID.forEach(a => makeChip($("avoidChips"), a, state.avoid.includes(a), on => {
+AVOID.forEach(a => makeChip($("avoidChips"), LABEL[a] || a, state.avoid.includes(a), on => {
   state.avoid = on ? [...state.avoid, a] : state.avoid.filter(x => x !== a); save();
 }, "avoid"));
 $("veg").checked = state.veg; $("quick").checked = state.quick;
-$("veg").addEventListener("change", e => { state.veg = e.target.checked; save(); });
-$("quick").addEventListener("change", e => { state.quick = e.target.checked; save(); });
+["veg", "quick", "mild", "korean", "simple"].forEach(k => {
+  $(k).checked = !!state[k];
+  $(k).addEventListener("change", e => { state[k] = e.target.checked; save(); });
+});
 $("people").addEventListener("change", e => { state.people = Number(e.target.value); save(); render(); });
 
 // ---------- 식단 만들기 ----------
@@ -223,6 +249,9 @@ function allowed(m) {
   if (m.g.some(t => state.avoid.includes(t))) return false;
   if (state.veg && m.g.some(t => MEAT.includes(t))) return false;
   if (state.quick && m.t > 30) return false;
+  if (state.mild && m.spicy) return false;
+  if (state.korean && m.w) return false;
+  if (state.simple && m.i.length > 4) return false;
   return true;
 }
 const pool = meal => MENUS.filter(m => m.m.includes(meal) && allowed(m));
