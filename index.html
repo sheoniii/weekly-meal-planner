@@ -217,7 +217,13 @@
         <label class="chip"><input type="checkbox" id="lowcarb"><span>🍞 탄수화물 적게</span></label>
         <label class="chip"><input type="checkbox" id="bp"><span>🩺 고혈압 참고</span></label>
         <label class="chip"><input type="checkbox" id="chol"><span>🩺 콜레스테롤 참고</span></label>
+        <label class="chip"><input type="checkbox" id="lowsugar"><span>🍬 당 적게</span></label>
+        <label class="chip"><input type="checkbox" id="lowfat"><span>🫒 기름기 적게</span></label>
+        <label class="chip"><input type="checkbox" id="manyveg"><span>🥦 채소 듬뿍</span></label>
+        <label class="chip"><input type="checkbox" id="seafood"><span>🐟 생선·해산물 위주</span></label>
+        <label class="chip"><input type="checkbox" id="calcium"><span>🦴 칼슘 챙기기(우유·두부·멸치)</span></label>
       </div>
+      <div class="note">당 적게는 바나나, 시리얼, 케첩, 감자류, 단 과일 같은 재료가 든 메뉴를 뺐어요. 기름기 적게는 돼지고기, 베이컨, 치즈, 마요네즈와 튀김·전·크림 요리를 뺐어요. 채소 듬뿍은 채소류 재료가 3가지 이상 든 메뉴예요. 모두 재료 기준의 참고용이고, 당뇨 등 질환이 있다면 의사나 영양사와 상의해 주세요.</div>
       <div class="note">가벼운 식단과 단백질 위주는 메뉴를 재료 기준으로 나눈 참고용 분류예요. 칼로리와 영양 수치는 계산하지 않았어요.</div>
       <div class="note">저염은 간이 약한 메뉴를 제가 직접 고른 목록이에요. 탄수화물 적게는 밥, 면, 빵, 감자류가 없는 메뉴만 골라요. 실제 나트륨과 탄수화물 양은 계산하지 않았어요.</div>
       <div class="note">🩺 고혈압 참고는 저염 메뉴에서 치즈, 소스류까지 더 뺀 메뉴예요. 콜레스테롤 참고는 계란, 새우·오징어·조개, 돼지고기, 소고기, 베이컨, 치즈, 마요네즈가 든 메뉴를 뺀 메뉴예요. <b>치료용 식단이 아니라 재료 기준의 참고용이에요.</b> 질환이 있다면 의사나 영양사와 상의해서 정해 주세요.</div>
@@ -230,6 +236,11 @@
         <label class="chip"><input type="checkbox" id="kid"><span>👶 아이와 함께(순한 맛)</span></label>
         <label class="chip"><input type="checkbox" id="soft"><span>🧓 부드러운 음식</span></label>
         <label class="chip"><input type="checkbox" id="korean"><span>🍚 한식만</span></label>
+        <label class="chip"><input type="checkbox" id="spicyfocus"><span>🔥 매콤한 메뉴 위주</span></label>
+        <label class="chip"><input type="checkbox" id="meatfocus"><span>🥩 고기 든든하게</span></label>
+        <label class="chip"><input type="checkbox" id="westfocus"><span>🍝 양식 위주</span></label>
+        <label class="chip"><input type="checkbox" id="noodle"><span>🍜 면 요리 위주</span></label>
+        <label class="chip"><input type="checkbox" id="rice"><span>🍚 밥 든든하게</span></label>
       </div>
       <div class="note">채식 위주는 고기와 해산물만 빼요. 김치나 양념에 젓갈이 들어갈 수 있어요. 비건에 가깝게는 고기, 해산물, 계란, 유제품을 빼요(육수나 젓갈은 확인이 필요해요).</div>
       <div class="note">아이와 함께는 안 매운 메뉴, 부드러운 음식은 죽·두부·계란·국처럼 씹기 편한 메뉴로 제가 나눈 분류예요.</div>
@@ -242,6 +253,10 @@
         <label class="chip"><input type="checkbox" id="cheap"><span>💰 알뜰 메뉴</span></label>
         <label class="chip"><input type="checkbox" id="nosoup"><span>🍽️ 국물 없는 메뉴</span></label>
         <label class="chip"><input type="checkbox" id="soup"><span>🍲 국물 요리 위주</span></label>
+        <label class="chip"><input type="checkbox" id="nofire"><span>🔪 불 안 쓰는 메뉴</span></label>
+        <label class="chip"><input type="checkbox" id="lunchbox"><span>🍱 도시락으로 싸기 좋은</span></label>
+        <label class="chip"><input type="checkbox" id="onebowl"><span>🥣 한 그릇 요리</span></label>
+        <label class="chip"><input type="checkbox" id="longcook"><span>👩‍🍳 정성 들인 요리(30분 이상)</span></label>
       </div>
       <div class="note">재료 적은 메뉴는 필요한 재료가 4가지 이하인 메뉴예요. 알뜰 메뉴는 소고기와 해산물이 없고 재료가 5가지 이하인 메뉴예요.</div>
     </div>
@@ -269,9 +284,20 @@
 <script>
 const KEY = "pink-meal-v1";
 const MEALS = ["아침", "점심", "저녁"];
-const AVOID = ["돼지고기", "소고기", "닭고기", "해산물", "생선", "새우·조개", "계란", "유제품", "밀가루", "콩류"];
-const LABEL = { 해산물: "해산물 전부", 생선: "생선", "새우·조개": "새우·조개·오징어", 밀가루: "밀가루(면·빵)", 콩류: "콩·두부·된장" };
+const AVOID = ["돼지고기", "소고기", "닭고기", "해산물", "생선", "새우·조개", "계란", "유제품", "밀가루", "콩류",
+  "버섯", "양파", "당근", "오이", "브로콜리", "가지", "시금치·콩나물", "파·마늘", "토마토", "감자·고구마", "김치", "가공식품"];
+const LABEL = { 해산물: "해산물 전부", 생선: "생선", "새우·조개": "새우·조개·오징어", 밀가루: "밀가루(면·빵)", 콩류: "콩·두부·된장",
+  가공식품: "가공식품(어묵·베이컨·만두·참치캔)" };
+// 재료 이름으로 제외하는 항목 (직접 해먹는 메뉴에만 적용돼요)
+const AVOID_ING = {
+  버섯: ["버섯", "양송이"], 양파: ["양파"], 당근: ["당근"], 오이: ["오이"], 브로콜리: ["브로콜리"], 가지: ["가지"],
+  "시금치·콩나물": ["시금치", "콩나물"], "파·마늘": ["대파", "쪽파", "마늘"], 토마토: ["토마토", "방울토마토", "토마토소스", "케첩"],
+  "감자·고구마": ["감자", "고구마"], 김치: ["김치"], 가공식품: ["어묵", "베이컨", "만두", "유부", "참치", "마요네즈"]
+};
 const MEAT = ["돼지고기", "소고기", "닭고기", "해산물"];
+// 나중에 추가한 옵션 (메뉴에 같은 이름의 표시가 있어요)
+const NEW_KEYS = ["lowsugar", "lowfat", "manyveg", "seafood", "calcium", "spicyfocus", "meatfocus", "westfocus", "noodle", "rice",
+  "nofire", "lunchbox", "onebowl", "longcook"];
 const CAT = { 채: "채소·과일", 고: "고기·해산물", 달: "달걀·유제품", 곡: "곡물·면·빵", 양: "두부·가공·양념" };
 const CAT_ORDER = ["채", "고", "달", "곡", "양"];
 
@@ -402,6 +428,11 @@ const LOWSALT = new Set(["계란토스트", "요거트볼", "시리얼과 우유
   "닭가슴살 샐러드", "연두부 샐러드", "상추 닭가슴살 쌈", "닭가슴살 월남쌈", "토마토 샐러드 파스타",
   "닭가슴살 스테이크와 구운 채소", "두부스테이크", "연어 스테이크", "닭가슴살 야채볶음", "닭안심 구이와 고구마", "새우 야채볶음"]);
 const SALTY = ["김치", "된장", "고추장", "어묵", "베이컨", "마요네즈", "만두", "유부", "참치", "쌈장", "케첩", "카레가루", "멸치"];
+const SUGARY = ["바나나", "그래놀라", "시리얼", "케첩", "사과", "귤", "단호박", "떡국떡", "고구마", "감자", "토마토소스", "드레싱", "카레가루"];
+const NOFIRE = new Set(["요거트볼", "시리얼과 우유", "과일 샐러드", "두유와 토스트", "아보카도 토스트", "연두부 샐러드", "참치 샐러드", "닭가슴살 샐러드", "샌드위치", "바나나 오트밀"]);
+const LUNCHBOX = new Set(["유부초밥", "멸치 주먹밥", "샌드위치", "닭가슴살 월남쌈", "연어 포케", "오므라이스", "돈까스 정식", "김치볶음밥", "새우볶음밥", "참치마요덮밥", "카레라이스", "쌈밥"]);
+const ONEBOWL = new Set(["김치볶음밥", "새우볶음밥", "참치마요덮밥", "카레라이스", "콩나물비빔밥", "비빔밥", "나물 비빔밥", "오므라이스", "닭가슴살 덮밥", "버섯덮밥",
+  "연어 포케", "비빔국수", "잔치국수", "우동", "비빔냉면", "야끼소바", "떡만둣국", "토마토파스타", "크림파스타", "토마토 샐러드 파스타", "닭죽", "단호박죽"]);
 // 추가 정보: g 추가 분류, spicy 매운 음식, w 양식(한식 아님)
 const EXTRA = {
   "계란토스트": { g: ["밀가루"], w: 1 }, "요거트볼": { w: 1 }, "시리얼과 우유": { g: ["밀가루"], w: 1 },
@@ -435,6 +466,17 @@ MENUS.forEach(m => {
   m.soft = SOFT.has(m.n);
   m.vegan = !m.g.some(t => MEAT.includes(t) || t === "계란" || t === "유제품");
   m.quick15 = m.t <= 15;
+  m.lowsugar = !m.i.some(x => SUGARY.includes(x[0])) && !/죽/.test(m.n);
+  m.lowfat = !m.g.includes("돼지고기") && !m.i.some(x => ["베이컨", "치즈", "마요네즈"].includes(x[0])) && !/튀김|돈까스|파전|강정|크림|스튜/.test(m.n);
+  m.manyveg = m.i.filter(x => x[3] === "채").length >= 3;
+  m.seafood = m.g.includes("해산물") || m.g.includes("생선");
+  m.calcium = m.g.includes("유제품") || m.i.some(x => ["두부", "순두부", "멸치", "우유", "치즈", "요거트", "두유"].includes(x[0]));
+  m.spicyfocus = m.spicy;
+  m.meatfocus = m.g.some(t => ["돼지고기", "소고기", "닭고기"].includes(t));
+  m.westfocus = m.w;
+  m.noodle = m.i.some(x => ["소면", "우동면", "냉면사리", "스파게티면", "당면"].includes(x[0]));
+  m.rice = m.i.some(x => x[0] === "쌀" || x[0] === "누룽지");
+  m.nofire = NOFIRE.has(m.n); m.lunchbox = LUNCHBOX.has(m.n); m.onebowl = ONEBOWL.has(m.n); m.longcook = m.t >= 30;
   m.lowcarb = !m.i.some(x => x[3] === "곡" || x[0] === "감자" || x[0] === "고구마");
   // 고혈압 참고: 저염 + 치즈·드레싱·소스류 제외 / 콜레스테롤 참고: 계란, 새우·오징어·조개, 돼지·소고기, 베이컨·치즈·마요네즈 제외
   m.bp = m.lowsalt && !m.i.some(x => ["치즈", "드레싱", "토마토소스", "카레가루"].includes(x[0]));
@@ -501,7 +543,7 @@ AVOID.forEach(a => makeChip($("avoidChips"), LABEL[a] || a, state.avoid.includes
 }, "avoid"));
 $("veg").checked = state.veg; $("quick").checked = state.quick;
 const OPT_KEYS = ["veg", "quick", "mild", "korean", "simple", "light", "protein", "lowsalt", "lowcarb", "bp", "chol",
-  "quick15", "nosoup", "soup", "cheap", "vegan", "soft", "kid"];
+  "quick15", "nosoup", "soup", "cheap", "vegan", "soft", "kid", ...NEW_KEYS];
 OPT_KEYS.forEach(k => {
   $(k).checked = !!state[k];
   $(k).addEventListener("change", e => {
@@ -555,7 +597,19 @@ const DELIVERY = [
   { n: "한식 도시락", g: ["돼지고기", "계란", "콩류"], ok: { protein: 1, cheap: 1 } }
 ];
 const DBY = Object.fromEntries(DELIVERY.map(d => [d.n, d]));
-const DIET_KEYS = ["light", "protein", "lowsalt", "lowcarb", "bp", "chol", "soft", "kid", "cheap"];
+// 새로 추가한 옵션용 배달 분류 (참고용)
+Object.entries({
+  "샐러드·포케": { lowsugar: 1, lowfat: 1, manyveg: 1 },
+  "닭가슴살 샐러드 도시락": { lowsugar: 1, lowfat: 1, manyveg: 1 },
+  "구운 닭구이": { lowsugar: 1, lowfat: 1 },
+  "초밥·회": { lowfat: 1 },
+  "족발·보쌈": { lowsugar: 1 },
+  "쌈밥 도시락": { lowfat: 1, manyveg: 1, rice: 1 },
+  "야채죽": { lowfat: 1, rice: 1 },
+  "짜장면·탕수육": { noodle: 1 }, "마라탕": { noodle: 1 }, "냉면": { noodle: 1, lowfat: 1 }, "쌀국수": { noodle: 1, lowfat: 1 }, "파스타·리조또": { noodle: 1 },
+  "김밥·주먹밥": { rice: 1 }, "돈까스·덮밥": { rice: 1 }, "국밥(돼지·순대)": { rice: 1 }, "설렁탕·곰탕": { rice: 1, lowfat: 1 }, "한식 도시락": { rice: 1 }
+}).forEach(([n, o]) => Object.assign(DBY[n].ok, o));
+const DIET_KEYS = ["light", "protein", "lowsalt", "lowcarb", "bp", "chol", "soft", "kid", "cheap", "lowsugar", "lowfat", "manyveg", "noodle", "rice"];
 function deliveryAllowed(d) {
   if (d.g.some(t => state.avoid.includes(t))) return false;
   if (state.veg && d.g.some(t => MEAT.includes(t))) return false;
@@ -564,6 +618,11 @@ function deliveryAllowed(d) {
   if (state.korean && d.w) return false;
   if (state.soup && !d.soup) return false;
   if (state.nosoup && d.soup) return false;
+  if (state.seafood && !(d.g.includes("해산물") || d.g.includes("생선"))) return false;
+  if (state.calcium && !d.g.includes("유제품")) return false;
+  if (state.spicyfocus && !d.spicy) return false;
+  if (state.meatfocus && !d.g.some(t => ["돼지고기", "소고기", "닭고기"].includes(t))) return false;
+  if (state.westfocus && !d.w) return false;
   return DIET_KEYS.every(k => !state[k] || d.ok[k]);
 }
 function pickDelivery(used) {
@@ -607,6 +666,8 @@ function allowed(m) {
   if (state.vegan && !m.vegan) return false;
   if (state.soft && !m.soft) return false;
   if (state.kid && !m.kid) return false;
+  for (const k of NEW_KEYS) if (state[k] && !m[k]) return false;
+  if (state.avoid.some(a => AVOID_ING[a] && m.i.some(x => AVOID_ING[a].includes(x[0])))) return false;
   return true;
 }
 const pool = meal => MENUS.filter(m => m.m.includes(meal) && allowed(m));
@@ -818,9 +879,9 @@ const PICKERS = [
   { pane: "pane-meals", label: "🍽️ 끼니", title: "🍽️ 끼니 선택", sum: () => state.meals.length ? state.meals.join("·") : "선택 없음" },
   { pane: "pane-delivery", label: "🛵 배달·외식", title: "🛵 배달·외식", sum: () => Number(state.delivery) ? `주 ${state.delivery}번 (${state.deliveryMeal})` : "없음 (모두 직접)", on: () => Number(state.delivery) > 0 },
   { pane: "pane-avoid", label: "🚫 못 먹는 재료", title: "🚫 못 먹는 재료", sum: () => state.avoid.length ? state.avoid.map(a => LABEL[a] || a).join(", ") : "없음", on: () => state.avoid.length > 0 },
-  { pane: "pane-goal", label: "🎯 식단 목적", title: "🎯 식단 목적", keys: ["light", "protein", "lowsalt", "lowcarb", "bp", "chol"] },
-  { pane: "pane-taste", label: "🥬 식성·몸 상태", title: "🥬 식성·몸 상태", keys: ["veg", "vegan", "mild", "kid", "soft", "korean"] },
-  { pane: "pane-cook", label: "🍳 조리·비용", title: "🍳 조리·비용", keys: ["quick15", "quick", "simple", "cheap", "nosoup", "soup"] }
+  { pane: "pane-goal", label: "🎯 식단 목적", title: "🎯 식단 목적", keys: ["light", "protein", "lowsalt", "lowcarb", "bp", "chol", "lowsugar", "lowfat", "manyveg", "seafood", "calcium"] },
+  { pane: "pane-taste", label: "🥬 식성·몸 상태", title: "🥬 식성·몸 상태", keys: ["veg", "vegan", "mild", "kid", "soft", "korean", "spicyfocus", "meatfocus", "westfocus", "noodle", "rice"] },
+  { pane: "pane-cook", label: "🍳 조리·비용", title: "🍳 조리·비용", keys: ["quick15", "quick", "simple", "cheap", "nosoup", "soup", "nofire", "lunchbox", "onebowl", "longcook"] }
 ];
 let openPicker = null;
 function renderPickers() {
