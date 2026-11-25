@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>핑크 일주일 식단표</title>
+<style>
+  :root {
+    --bg: #fff0f6; --card: #ffffff; --pink: #ff7eb6; --pink-dark: #e0559a;
+    --pink-soft: #ffd6e8; --text: #5a2a43; --muted: #b07a96;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 24px 16px 60px; background: var(--bg); color: var(--text);
+    font-family: "Pretendard", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif; font-size: 16px;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; }
+  h1 { text-align: center; margin: 8px 0 4px; font-size: 28px; color: var(--pink-dark); }
+  .sub { text-align: center; color: var(--muted); margin-bottom: 18px; }
+  .card {
+    background: var(--card); border-radius: 20px; padding: 16px 18px; margin-bottom: 18px;
+    box-shadow: 0 4px 14px rgba(255,126,182,.2);
+  }
+  .card h2 { margin: 0 0 10px; font-size: 18px; color: var(--pink-dark); }
+  .field { margin-bottom: 14px; }
+  .field > .label { font-size: 14px; color: var(--muted); margin-bottom: 6px; display: block; }
+  select {
+    border: 2px solid var(--pink-soft); border-radius: 14px; padding: 8px 12px; font: inherit;
+    color: var(--text); background: #fffafc;
+  }
+  select:focus { outline: none; border-color: var(--pink); }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { position: relative; }
+  .chip input { position: absolute; opacity: 0; inset: 0; cursor: pointer; margin: 0; }
+  .chip span {
+    display: inline-block; padding: 7px 14px; border-radius: 99px; background: #fff5fa;
+    border: 2px solid var(--pink-soft); font-size: 15px; user-select: none; transition: .15s;
+  }
+  .chip input:checked + span { background: var(--pink); border-color: var(--pink); color: #fff; font-weight: 700; }
+  .chip input:focus-visible + span { outline: 2px solid var(--pink-dark); outline-offset: 2px; }
+  .chip.avoid input:checked + span { background: #ff6f91; border-color: #ff6f91; }
+  .note { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  button.main {
+    width: 100%; border: 0; border-radius: 16px; padding: 14px; font: inherit; font-weight: 700; font-size: 17px;
+    background: var(--pink); color: #fff; cursor: pointer; transition: transform .1s, background .2s;
+  }
+  button.main:hover { background: var(--pink-dark); }
+  button.main:active { transform: scale(.98); }
+  button.sub-btn {
+    border: 2px solid var(--pink-soft); background: #fff; color: var(--pink-dark); border-radius: 12px;
+    padding: 8px 14px; font: inherit; font-weight: 700; cursor: pointer;
+  }
+  button.sub-btn:hover { background: var(--pink-soft); }
+  .toolbar { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+  .day { margin-bottom: 14px; }
+  .day h3 { margin: 0 0 8px 4px; font-size: 16px; color: var(--pink-dark); }
+  .day h3.today::before { content: "🌟 "; }
+  .meal {
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: #fff5fa;
+    border-radius: 14px; margin-bottom: 6px;
+  }
+  .badge {
+    flex: none; width: 46px; text-align: center; font-size: 12px; font-weight: 700; color: #fff;
+    background: var(--pink); border-radius: 99px; padding: 4px 0;
+  }
+  .meal .info { flex: 1; min-width: 0; }
+  .meal .name { font-weight: 700; }
+  .meal .detail { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .meal.none .name { color: var(--muted); font-weight: 400; }
+  button.swap { border: 0; background: transparent; font-size: 20px; cursor: pointer; padding: 4px; }
+  .shop h4 { margin: 12px 0 6px; font-size: 15px; color: var(--pink-dark); }
+  .shop label { display: flex; align-items: center; gap: 10px; padding: 6px 4px; cursor: pointer; }
+  .shop input { width: 20px; height: 20px; accent-color: var(--pink); flex: none; }
+  .shop .q { margin-left: auto; color: var(--muted); font-size: 14px; white-space: nowrap; }
+  .shop label.checked .n { text-decoration: line-through; color: var(--muted); }
+  .empty { text-align: center; color: var(--muted); padding: 24px 0; }
+  .foot { font-size: 12px; color: var(--muted); text-align: center; line-height: 1.6; }
+  .toast {
+    position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--pink-dark);
+    color: #fff; padding: 10px 18px; border-radius: 99px; font-size: 14px; opacity: 0; pointer-events: none;
+    transition: opacity .3s;
+  }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🍙 일주일 식단표 🍙</h1>
+  <div class="sub">조건만 고르면 일주일 식단과 장보기 목록을 만들어 드려요</div>
+
+  <div class="card">
+    <h2>어떤 식단이 좋아요?</h2>
+    <div class="field">
+      <span class="label">몇 명이 먹나요?</span>
+      <select id="people"></select>
+    </div>
+    <div class="field">
+      <span class="label">끼니 선택</span>
+      <div class="chips" id="mealChips"></div>
+    </div>
+    <div class="field">
+      <span class="label">못 먹는 재료 (골라 주세요)</span>
+      <div class="chips" id="avoidChips"></div>
+    </div>
+    <div class="field">
+      <span class="label">옵션</span>
+      <div class="chips">
+        <label class="chip"><input type="checkbox" id="veg"><span>🥬 채식 위주</span></label>
+        <label class="chip"><input type="checkbox" id="quick"><span>⏱️ 30분 이하만</span></label>
+      </div>
+      <div class="note">채식 위주는 고기와 해산물만 빼요. 김치나 양념에 젓갈이 들어갈 수 있어요.</div>
+    </div>
+    <button class="main" id="make">식단 짜기 🍽️</button>
+  </div>
+
+  <div id="result"></div>
+
+  <div class="foot">
+    의학적·영양학적 식단이 아니에요. 알레르기가 있다면 재료를 꼭 직접 확인해 주세요.
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const KEY = "pink-meal-v1";
+const MEALS = ["아침", "점심", "저녁"];
+const AVOID = ["돼지고기", "소고기", "닭고기", "해산물", "계란", "유제품"];
+const MEAT = ["돼지고기", "소고기", "닭고기", "해산물"];
+const CAT = { 채: "채소·과일", 고: "고기·해산물", 달: "달걀·유제품", 곡: "곡물·면·빵", 양: "두부·가공·양념" };
+const CAT_ORDER = ["채", "고", "달", "곡", "양"];
+
+// 메뉴: n 이름, m 끼니, t 조리시간(분), g 들어간 재료 분류, i 재료[이름, 1인분 양, 단위, 분류]
+const MENUS = [
+  // 아침
+  { n: "계란토스트", m: ["아침"], t: 10, g: ["계란"], i: [["식빵", 2, "장", "곡"], ["계란", 1, "개", "달"], ["양배추", 30, "g", "채"]] },
+  { n: "요거트볼", m: ["아침"], t: 5, g: ["유제품"], i: [["요거트", 150, "g", "달"], ["바나나", 1, "개", "채"], ["그래놀라", 30, "g", "곡"]] },
+  { n: "계란밥", m: ["아침", "점심"], t: 10, g: ["계란"], i: [["쌀", 100, "g", "곡"], ["계란", 1, "개", "달"], ["김", 1, "장", "양"]] },
+  { n: "미역국과 밥", m: ["아침"], t: 30, g: ["소고기"], i: [["건미역", 5, "g", "채"], ["소고기", 30, "g", "고"], ["쌀", 100, "g", "곡"]] },
+  { n: "된장국과 밥", m: ["아침"], t: 20, g: [], i: [["두부", 50, "g", "양"], ["애호박", 50, "g", "채"], ["된장", 15, "g", "양"], ["쌀", 100, "g", "곡"]] },
+  { n: "시리얼과 우유", m: ["아침"], t: 5, g: ["유제품"], i: [["시리얼", 40, "g", "곡"], ["우유", 200, "ml", "달"]] },
+  { n: "감자수프와 빵", m: ["아침"], t: 25, g: ["유제품"], i: [["감자", 100, "g", "채"], ["우유", 150, "ml", "달"], ["식빵", 1, "장", "곡"]] },
+  { n: "바나나 오트밀", m: ["아침"], t: 10, g: ["유제품"], i: [["오트밀", 40, "g", "곡"], ["우유", 150, "ml", "달"], ["바나나", 1, "개", "채"]] },
+  { n: "고구마와 우유", m: ["아침"], t: 20, g: ["유제품"], i: [["고구마", 150, "g", "채"], ["우유", 200, "ml", "달"]] },
+  // 점심
+  { n: "김치볶음밥", m: ["점심", "저녁"], t: 20, g: ["계란"], i: [["쌀", 100, "g", "곡"], ["김치", 80, "g", "양"], ["계란", 1, "개", "달"], ["대파", 10, "g", "채"]] },
+  { n: "비빔국수", m: ["점심"], t: 20, g: ["계란"], i: [["소면", 100, "g", "곡"], ["오이", 50, "g", "채"], ["김치", 60, "g", "양"], ["계란", 1, "개", "달"]] },
+  { n: "참치마요덮밥", m: ["점심"], t: 15, g: ["해산물", "계란"], i: [["쌀", 100, "g", "곡"], ["참치", 40, "g", "고"], ["마요네즈", 15, "g", "양"]] },
+  { n: "잔치국수", m: ["점심"], t: 25, g: ["계란"], i: [["소면", 100, "g", "곡"], ["애호박", 50, "g", "채"], ["계란", 1, "개", "달"], ["대파", 10, "g", "채"]] },
+  { n: "닭가슴살 샐러드", m: ["점심"], t: 20, g: ["닭고기"], i: [["닭가슴살", 100, "g", "고"], ["양상추", 50, "g", "채"], ["방울토마토", 5, "개", "채"], ["드레싱", 20, "ml", "양"]] },
+  { n: "우동", m: ["점심"], t: 15, g: ["해산물"], i: [["우동면", 1, "팩", "곡"], ["어묵", 50, "g", "고"], ["대파", 10, "g", "채"]] },
+  { n: "카레라이스", m: ["점심", "저녁"], t: 30, g: [], i: [["쌀", 100, "g", "곡"], ["감자", 80, "g", "채"], ["당근", 40, "g", "채"], ["양파", 50, "g", "채"], ["카레가루", 20, "g", "양"]] },
+  { n: "콩나물비빔밥", m: ["점심"], t: 25, g: ["계란"], i: [["쌀", 100, "g", "곡"], ["콩나물", 80, "g", "채"], ["계란", 1, "개", "달"], ["고추장", 15, "g", "양"]] },
+  { n: "유부초밥", m: ["점심"], t: 25, g: [], i: [["쌀", 100, "g", "곡"], ["유부", 3, "개", "양"], ["당근", 20, "g", "채"]] },
+  { n: "떡만둣국", m: ["점심"], t: 25, g: ["돼지고기", "계란"], i: [["떡국떡", 100, "g", "곡"], ["만두", 4, "개", "양"], ["계란", 1, "개", "달"]] },
+  { n: "새우볶음밥", m: ["점심", "저녁"], t: 20, g: ["해산물", "계란"], i: [["쌀", 100, "g", "곡"], ["새우", 50, "g", "고"], ["계란", 1, "개", "달"], ["양파", 30, "g", "채"]] },
+  { n: "샌드위치", m: ["점심"], t: 15, g: ["계란", "유제품"], i: [["식빵", 2, "장", "곡"], ["계란", 1, "개", "달"], ["오이", 30, "g", "채"], ["치즈", 1, "장", "달"]] },
+  // 저녁
+  { n: "제육볶음", m: ["저녁"], t: 25, g: ["돼지고기"], i: [["돼지고기", 150, "g", "고"], ["양파", 50, "g", "채"], ["양배추", 60, "g", "채"], ["고추장", 20, "g", "양"], ["쌀", 100, "g", "곡"]] },
+  { n: "된장찌개", m: ["저녁"], t: 25, g: [], i: [["두부", 70, "g", "양"], ["애호박", 50, "g", "채"], ["감자", 60, "g", "채"], ["양파", 30, "g", "채"], ["된장", 20, "g", "양"], ["쌀", 100, "g", "곡"]] },
+  { n: "김치찌개", m: ["저녁"], t: 30, g: ["돼지고기"], i: [["김치", 100, "g", "양"], ["돼지고기", 80, "g", "고"], ["두부", 50, "g", "양"], ["쌀", 100, "g", "곡"]] },
+  { n: "닭볶음탕", m: ["저녁"], t: 45, g: ["닭고기"], i: [["닭고기", 200, "g", "고"], ["감자", 100, "g", "채"], ["당근", 50, "g", "채"], ["양파", 50, "g", "채"], ["쌀", 100, "g", "곡"]] },
+  { n: "불고기", m: ["저녁"], t: 30, g: ["소고기"], i: [["소고기", 120, "g", "고"], ["양파", 50, "g", "채"], ["당근", 30, "g", "채"], ["쌀", 100, "g", "곡"]] },
+  { n: "고등어구이", m: ["저녁"], t: 25, g: ["해산물"], i: [["고등어", 0.5, "마리", "고"], ["무", 60, "g", "채"], ["쌀", 100, "g", "곡"]] },
+  { n: "두부조림", m: ["저녁"], t: 20, g: [], i: [["두부", 150, "g", "양"], ["양파", 40, "g", "채"], ["대파", 10, "g", "채"], ["쌀", 100, "g", "곡"]] },
+  { n: "계란말이와 시금치나물", m: ["저녁"], t: 20, g: ["계란"], i: [["계란", 2, "개", "달"], ["당근", 20, "g", "채"], ["시금치", 60, "g", "채"], ["쌀", 100, "g", "곡"]] },
+  { n: "오징어볶음", m: ["저녁"], t: 30, g: ["해산물"], i: [["오징어", 0.5, "마리", "고"], ["양파", 50, "g", "채"], ["양배추", 50, "g", "채"], ["고추장", 20, "g", "양"], ["쌀", 100, "g", "곡"]] },
+  { n: "순두부찌개", m: ["저녁"], t: 25, g: ["해산물", "계란"], i: [["순두부", 0.5, "봉", "양"], ["계란", 1, "개", "달"], ["바지락", 50, "g", "고"], ["쌀", 100, "g", "곡"]] },
+  { n: "닭갈비", m: ["저녁"], t: 35, g: ["닭고기"], i: [["닭고기", 150, "g", "고"], ["양배추", 80, "g", "채"], ["고구마", 60, "g", "채"], ["양파", 40, "g", "채"], ["고추장", 20, "g", "양"], ["쌀", 100, "g", "곡"]] },
+  { n: "비빔밥", m: ["저녁"], t: 35, g: ["소고기", "계란"], i: [["쌀", 100, "g", "곡"], ["시금치", 40, "g", "채"], ["콩나물", 40, "g", "채"], ["당근", 30, "g", "채"], ["계란", 1, "개", "달"], ["소고기", 50, "g", "고"], ["고추장", 15, "g", "양"]] },
+  { n: "두부김치", m: ["저녁"], t: 20, g: ["돼지고기"], i: [["두부", 150, "g", "양"], ["김치", 80, "g", "양"], ["돼지고기", 60, "g", "고"], ["쌀", 100, "g", "곡"]] },
+  { n: "토마토파스타", m: ["저녁"], t: 25, g: [], i: [["스파게티면", 100, "g", "곡"], ["토마토소스", 100, "g", "양"], ["양파", 40, "g", "채"], ["마늘", 10, "g", "채"]] },
+  { n: "크림파스타", m: ["저녁"], t: 25, g: ["유제품", "돼지고기"], i: [["스파게티면", 100, "g", "곡"], ["우유", 150, "ml", "달"], ["양송이", 50, "g", "채"], ["베이컨", 40, "g", "고"]] },
+  { n: "어묵탕", m: ["저녁"], t: 25, g: ["해산물"], i: [["어묵", 80, "g", "고"], ["무", 60, "g", "채"], ["대파", 10, "g", "채"], ["쌀", 100, "g", "곡"]] },
+  { n: "감자채볶음 정식", m: ["저녁"], t: 20, g: [], i: [["감자", 120, "g", "채"], ["당근", 30, "g", "채"], ["양파", 30, "g", "채"], ["쌀", 100, "g", "곡"]] },
+  { n: "소고기무국", m: ["저녁"], t: 40, g: ["소고기"], i: [["소고기", 60, "g", "고"], ["무", 100, "g", "채"], ["쌀", 100, "g", "곡"]] },
+  { n: "버섯덮밥", m: ["저녁"], t: 20, g: [], i: [["쌀", 100, "g", "곡"], ["버섯", 60, "g", "채"], ["양파", 40, "g", "채"]] }
+];
+const BY_NAME = Object.fromEntries(MENUS.map(m => [m.n, m]));
+
+const $ = id => document.getElementById(id);
+const days = ["일", "월", "화", "수", "목", "금", "토"];
+const pad = n => String(n).padStart(2, "0");
+const toISO = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const fmtDate = iso => { const [y, m, d] = iso.split("-").map(Number); return `${m}/${d} (${days[new Date(y, m - 1, d).getDay()]})`; };
+
+let state = { people: 2, meals: ["아침", "점심", "저녁"], avoid: [], veg: false, quick: false, week: null, checked: {} };
+try {
+  const s = JSON.parse(localStorage.getItem(KEY));
+  if (s && typeof s === "object") state = Object.assign(state, s);
+} catch (e) {}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+
+function toast(msg) {
+  const t = $("toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toast.id); toast.id = setTimeout(() => t.classList.remove("show"), 1800);
+}
+
+// ---------- 설정 화면 ----------
+for (let i = 1; i <= 6; i++) { const o = document.createElement("option"); o.value = i; o.textContent = i + "명"; $("people").appendChild(o); }
+$("people").value = state.people;
+
+function makeChip(parent, label, checked, onChange, extra) {
+  const l = document.createElement("label"); l.className = "chip" + (extra ? " " + extra : "");
+  const i = document.createElement("input"); i.type = "checkbox"; i.checked = checked;
+  const s = document.createElement("span"); s.textContent = label;
+  i.addEventListener("change", () => onChange(i.checked));
+  l.append(i, s); parent.appendChild(l);
+}
+MEALS.forEach(m => makeChip($("mealChips"), m, state.meals.includes(m), on => {
+  state.meals = on ? MEALS.filter(x => state.meals.includes(x) || x === m) : state.meals.filter(x => x !== m);
+  save();
+}));
+AVOID.forEach(a => makeChip($("avoidChips"), a, state.avoid.includes(a), on => {
+  state.avoid = on ? [...state.avoid, a] : state.avoid.filter(x => x !== a); save();
+}, "avoid"));
+$("veg").checked = state.veg; $("quick").checked = state.quick;
+$("veg").addEventListener("change", e => { state.veg = e.target.checked; save(); });
+$("quick").addEventListener("change", e => { state.quick = e.target.checked; save(); });
+$("people").addEventListener("change", e => { state.people = Number(e.target.value); save(); render(); });
+
+// ---------- 식단 만들기 ----------
+function allowed(m) {
+  if (m.g.some(t => state.avoid.includes(t))) return false;
+  if (state.veg && m.g.some(t => MEAT.includes(t))) return false;
+  if (state.quick && m.t > 30) return false;
+  return true;
+}
+const pool = meal => MENUS.filter(m => m.m.includes(meal) && allowed(m));
+const rand = arr => arr[Math.floor(Math.random() * arr.length)];
+
+function usedNames() {
+  const s = new Set();
+  (state.week || []).forEach(d => MEALS.forEach(m => { if (d[m]) s.add(d[m]); }));
+  return s;
+}
+
+function pick(meal, used, last) {
+  const p = pool(meal);
+  if (!p.length) return null;
+  let c = p.filter(m => !used.has(m.n));
+  if (!c.length) c = p.filter(m => m.n !== (last && last.n));
+  if (!c.length) c = p;
+  if (last && last.g.length) {
+    const diff = c.filter(m => !m.g.some(t => last.g.includes(t)));
+    if (diff.length) c = diff;
+  }
+  return rand(c);
+}
+
+function makeWeek() {
+  const used = new Set(), last = {}, week = [];
+  const start = new Date();
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
+    const row = { date: toISO(d) };
+    state.meals.forEach(meal => {
+      const m = pick(meal, used, last[meal]);
+      row[meal] = m ? m.n : null;
+      if (m) { used.add(m.n); last[meal] = m; }
+    });
+    week.push(row);
+  }
+  state.week = week; state.checked = {}; save(); render();
+}
+
+function swap(di, meal) {
+  const cur = state.week[di][meal];
+  const used = usedNames();
+  const p = pool(meal).filter(m => m.n !== cur);
+  let c = p.filter(m => !used.has(m.n));
+  if (!c.length) c = p;
+  if (!c.length) { toast("바꿀 다른 메뉴가 없어요"); return; }
+  state.week[di][meal] = rand(c).n; save(); render();
+}
+
+// ---------- 장보기 ----------
+function fmtQty(q, u) {
+  if (u === "g" && q >= 1000) return (Math.round(q / 100) / 10) + "kg";
+  if (u === "ml" && q >= 1000) return (Math.round(q / 100) / 10) + "L";
+  return (Math.round(q * 10) / 10) + u;
+}
+function shopping() {
+  const map = {};
+  (state.week || []).forEach(d => MEALS.forEach(meal => {
+    const m = d[meal] && BY_NAME[d[meal]];
+    if (!m) return;
+    m.i.forEach(([name, q, u, c]) => {
+      const k = name + "|" + u;
+      map[k] = map[k] || { name, u, c, q: 0 };
+      map[k].q += q * state.people;
+    });
+  }));
+  return map;
+}
+
+// ---------- 화면 ----------
+function render() {
+  const box = $("result"); box.innerHTML = "";
+  if (!state.week) return;
+
+  const bar = document.createElement("div"); bar.className = "toolbar";
+  const again = document.createElement("button"); again.className = "sub-btn"; again.textContent = "🔁 다시 짜기";
+  again.addEventListener("click", makeWeek);
+  const copy = document.createElement("button"); copy.className = "sub-btn"; copy.textContent = "📋 복사하기";
+  copy.addEventListener("click", copyText);
+  bar.append(again, copy);
+
+  const plan = document.createElement("div"); plan.className = "card";
+  const h = document.createElement("h2"); h.textContent = `🗓️ 일주일 식단 (${state.people}명 기준)`;
+  plan.append(h, bar);
+
+  const today = toISO(new Date());
+  state.week.forEach((d, di) => {
+    const day = document.createElement("div"); day.className = "day";
+    const t = document.createElement("h3"); t.textContent = fmtDate(d.date);
+    if (d.date === today) t.className = "today";
+    day.appendChild(t);
+    if (!state.meals.length) {
+      const e = document.createElement("div"); e.className = "empty"; e.textContent = "끼니를 하나 이상 골라 주세요";
+      day.appendChild(e);
+    }
+    state.meals.forEach(meal => {
+      const row = document.createElement("div");
+      const m = d[meal] && BY_NAME[d[meal]];
+      row.className = "meal" + (m ? "" : " none");
+      const b = document.createElement("div"); b.className = "badge"; b.textContent = meal;
+      const info = document.createElement("div"); info.className = "info";
+      const n = document.createElement("div"); n.className = "name";
+      n.textContent = m ? m.n : "맞는 메뉴가 없어요 😢";
+      info.appendChild(n);
+      if (m) {
+        const de = document.createElement("div"); de.className = "detail";
+        de.textContent = `⏱️ ${m.t}분 · ${m.i.slice(0, 4).map(x => x[0]).join(", ")}`;
+        info.appendChild(de);
+      }
+      row.append(b, info);
+      if (m) {
+        const s = document.createElement("button"); s.className = "swap"; s.title = "다른 메뉴로 바꾸기"; s.textContent = "🔄";
+        s.addEventListener("click", () => swap(di, meal));
+        row.appendChild(s);
+      }
+      day.appendChild(row);
+    });
+    plan.appendChild(day);
+  });
+  box.appendChild(plan);
+
+  const list = shopping();
+  const shop = document.createElement("div"); shop.className = "card shop";
+  const sh = document.createElement("h2"); sh.textContent = "🛒 장보기 목록";
+  shop.appendChild(sh);
+  const keys = Object.keys(list);
+  if (!keys.length) {
+    const e = document.createElement("div"); e.className = "empty"; e.textContent = "식단이 비어 있어요";
+    shop.appendChild(e);
+  }
+  CAT_ORDER.forEach(c => {
+    const items = keys.map(k => [k, list[k]]).filter(([, v]) => v.c === c).sort((a, b) => a[1].name.localeCompare(b[1].name, "ko"));
+    if (!items.length) return;
+    const t = document.createElement("h4"); t.textContent = CAT[c]; shop.appendChild(t);
+    items.forEach(([k, v]) => {
+      const l = document.createElement("label");
+      const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = !!state.checked[k];
+      if (cb.checked) l.className = "checked";
+      cb.addEventListener("change", () => { state.checked[k] = cb.checked; save(); l.classList.toggle("checked", cb.checked); });
+      const n = document.createElement("span"); n.className = "n"; n.textContent = v.name;
+      const q = document.createElement("span"); q.className = "q"; q.textContent = fmtQty(v.q, v.u);
+      l.append(cb, n, q); shop.appendChild(l);
+    });
+  });
+  box.appendChild(shop);
+}
+
+function copyText() {
+  const lines = [`[일주일 식단표 · ${state.people}명 기준]`];
+  state.week.forEach(d => {
+    lines.push("", fmtDate(d.date));
+    state.meals.forEach(m => lines.push(`- ${m}: ${d[m] || "(없음)"}`));
+  });
+  lines.push("", "[장보기 목록]");
+  const list = shopping();
+  CAT_ORDER.forEach(c => {
+    const items = Object.values(list).filter(v => v.c === c);
+    if (!items.length) return;
+    lines.push(`# ${CAT[c]}`);
+    items.sort((a, b) => a.name.localeCompare(b.name, "ko")).forEach(v => lines.push(`- ${v.name} ${fmtQty(v.q, v.u)}`));
+  });
+  const text = lines.join("\n");
+  const done = () => toast("복사했어요 💗");
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done, () => fallbackCopy(text, done));
+  } else fallbackCopy(text, done);
+}
+function fallbackCopy(text, done) {
+  const ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta);
+  ta.select(); try { document.execCommand("copy"); done(); } catch (e) { toast("복사에 실패했어요"); }
+  ta.remove();
+}
+
+$("make").addEventListener("click", makeWeek);
+render();
+</script>
+</body>
+</html>
