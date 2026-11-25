@@ -8,60 +8,88 @@
   :root {
     --bg: #fff0f6; --card: #ffffff; --pink: #ff7eb6; --pink-dark: #e0559a;
     --pink-soft: #ffd6e8; --text: #5a2a43; --muted: #b07a96;
+    --soft: #fff5fa; --input-bg: #fffafc; --on-pink: #ffffff; --avoid: #ff6f91;
+    --title: #e0559a; --bgmuted: #b07a96; --hover: #ffd6e8;
+    --shadow: 0 4px 14px rgba(255,126,182,.2); --card-border: 0 solid transparent;
+    --r: 20px; --r2: 14px; --r3: 99px;
+    --font: "Pretendard", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+  }
+  :root[data-theme="dark"] {
+    --bg: #1e1a24; --card: #2a2431; --pink: #ff8fc4; --pink-dark: #ff9fcd;
+    --pink-soft: #4a3a55; --text: #f3e9f5; --muted: #b9a4c4;
+    --soft: #352d3d; --input-bg: #231e29; --on-pink: #2a1030; --avoid: #ff7a9a;
+    --title: #ff9fcd; --bgmuted: #b9a4c4; --hover: #4a3a55;
+    --shadow: 0 4px 14px rgba(0,0,0,.45);
+  }
+  :root[data-theme="cream"] {
+    --bg: #f7efe2; --card: #fffaf0; --pink: #c98a4b; --pink-dark: #8a5a2b;
+    --pink-soft: #ecdcc3; --text: #4a3524; --muted: #9a8068;
+    --soft: #f6ecda; --input-bg: #fffdf6; --on-pink: #ffffff; --avoid: #b5543c;
+    --title: #8a5a2b; --bgmuted: #9a8068; --hover: #ecdcc3;
+    --shadow: 0 4px 14px rgba(138,90,43,.18);
+  }
+  :root[data-theme="retro"] {
+    --bg: #20204a; --card: #fef3c7; --pink: #ff4f81; --pink-dark: #b0124f;
+    --pink-soft: #1b1b3a; --text: #1b1b3a; --muted: #5b5b8a;
+    --soft: #ffe9a8; --input-bg: #fffbe6; --on-pink: #ffffff; --avoid: #e0242a;
+    --title: #ffd23f; --bgmuted: #b8b8e6; --hover: #ffd23f;
+    --shadow: 5px 5px 0 #0d0d24; --card-border: 3px solid #1b1b3a;
+    --r: 0px; --r2: 0px; --r3: 0px;
+    --font: "DotGothic16", "D2Coding", "Courier New", "Malgun Gothic", monospace;
   }
   * { box-sizing: border-box; }
   body {
     margin: 0; padding: 24px 16px 60px; background: var(--bg); color: var(--text);
-    font-family: "Pretendard", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif; font-size: 16px;
+    font-family: var(--font); font-size: 16px; transition: background .3s;
   }
   .wrap { max-width: 640px; margin: 0 auto; }
-  h1 { text-align: center; margin: 8px 0 4px; font-size: 28px; color: var(--pink-dark); }
-  .sub { text-align: center; color: var(--muted); margin-bottom: 18px; }
+  h1 { text-align: center; margin: 8px 0 4px; font-size: 28px; color: var(--title); }
+  .sub { text-align: center; color: var(--bgmuted); margin-bottom: 18px; }
   .card {
-    background: var(--card); border-radius: 20px; padding: 16px 18px; margin-bottom: 18px;
-    box-shadow: 0 4px 14px rgba(255,126,182,.2);
+    background: var(--card); border-radius: var(--r); padding: 16px 18px; margin-bottom: 18px;
+    box-shadow: var(--shadow); border: var(--card-border);
   }
   .card h2 { margin: 0 0 10px; font-size: 18px; color: var(--pink-dark); }
   .field { margin-bottom: 14px; }
   .field > .label { font-size: 14px; color: var(--muted); margin-bottom: 6px; display: block; }
   select {
-    border: 2px solid var(--pink-soft); border-radius: 14px; padding: 8px 12px; font: inherit;
-    color: var(--text); background: #fffafc;
+    border: 2px solid var(--pink-soft); border-radius: var(--r2); padding: 8px 12px; font: inherit;
+    color: var(--text); background: var(--input-bg);
   }
   select:focus { outline: none; border-color: var(--pink); }
   .chips { display: flex; flex-wrap: wrap; gap: 8px; }
   .chip { position: relative; }
   .chip input { position: absolute; opacity: 0; inset: 0; cursor: pointer; margin: 0; }
   .chip span {
-    display: inline-block; padding: 7px 14px; border-radius: 99px; background: #fff5fa;
+    display: inline-block; padding: 7px 14px; border-radius: var(--r3); background: var(--soft);
     border: 2px solid var(--pink-soft); font-size: 15px; user-select: none; transition: .15s;
   }
-  .chip input:checked + span { background: var(--pink); border-color: var(--pink); color: #fff; font-weight: 700; }
+  .chip input:checked + span { background: var(--pink); border-color: var(--pink); color: var(--on-pink); font-weight: 700; }
   .chip input:focus-visible + span { outline: 2px solid var(--pink-dark); outline-offset: 2px; }
-  .chip.avoid input:checked + span { background: #ff6f91; border-color: #ff6f91; }
+  .chip.avoid input:checked + span { background: var(--avoid); border-color: var(--avoid); color: #fff; }
   .note { font-size: 12px; color: var(--muted); margin-top: 4px; }
   button.main {
-    width: 100%; border: 0; border-radius: 16px; padding: 14px; font: inherit; font-weight: 700; font-size: 17px;
-    background: var(--pink); color: #fff; cursor: pointer; transition: transform .1s, background .2s;
+    width: 100%; border: var(--card-border); border-radius: var(--r2); padding: 14px; font: inherit; font-weight: 700; font-size: 17px;
+    background: var(--pink); color: var(--on-pink); cursor: pointer; transition: transform .1s, background .2s;
   }
   button.main:hover { background: var(--pink-dark); }
   button.main:active { transform: scale(.98); }
   button.sub-btn {
-    border: 2px solid var(--pink-soft); background: #fff; color: var(--pink-dark); border-radius: 12px;
+    border: 2px solid var(--pink-soft); background: var(--card); color: var(--pink-dark); border-radius: var(--r2);
     padding: 8px 14px; font: inherit; font-weight: 700; cursor: pointer;
   }
-  button.sub-btn:hover { background: var(--pink-soft); }
+  button.sub-btn:hover { background: var(--hover); }
   .toolbar { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
   .day { margin-bottom: 14px; }
   .day h3 { margin: 0 0 8px 4px; font-size: 16px; color: var(--pink-dark); }
   .day h3.today::before { content: "🌟 "; }
   .meal {
-    display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: #fff5fa;
-    border-radius: 14px; margin-bottom: 6px;
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--soft);
+    border-radius: var(--r2); margin-bottom: 6px;
   }
   .badge {
-    flex: none; width: 46px; text-align: center; font-size: 12px; font-weight: 700; color: #fff;
-    background: var(--pink); border-radius: 99px; padding: 4px 0;
+    flex: none; width: 46px; text-align: center; font-size: 12px; font-weight: 700; color: var(--on-pink);
+    background: var(--pink); border-radius: var(--r3); padding: 4px 0;
   }
   .meal .info { flex: 1; min-width: 0; }
   .meal .name { font-weight: 700; }
@@ -74,7 +102,7 @@
   .shop .q { margin-left: auto; color: var(--muted); font-size: 14px; white-space: nowrap; }
   .shop label.checked .n { text-decoration: line-through; color: var(--muted); }
   .empty { text-align: center; color: var(--muted); padding: 24px 0; }
-  .foot { font-size: 12px; color: var(--muted); text-align: center; line-height: 1.6; }
+  .foot { font-size: 12px; color: var(--bgmuted); text-align: center; line-height: 1.6; }
   .toast {
     position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--pink-dark);
     color: #fff; padding: 10px 18px; border-radius: 99px; font-size: 14px; opacity: 0; pointer-events: none;
@@ -87,6 +115,11 @@
 <div class="wrap">
   <h1>🍙 일주일 식단표 🍙</h1>
   <div class="sub">조건만 고르면 일주일 식단과 장보기 목록을 만들어 드려요</div>
+
+  <div class="card">
+    <h2>🎨 테마</h2>
+    <div class="chips" id="themeChips"></div>
+  </div>
 
   <div class="card">
     <h2>어떤 식단이 좋아요?</h2>
@@ -207,12 +240,20 @@ const pad = n => String(n).padStart(2, "0");
 const toISO = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 const fmtDate = iso => { const [y, m, d] = iso.split("-").map(Number); return `${m}/${d} (${days[new Date(y, m - 1, d).getDay()]})`; };
 
-let state = { people: 2, meals: ["아침", "점심", "저녁"], avoid: [], veg: false, quick: false, mild: false, korean: false, simple: false, week: null, checked: {} };
+let state = { people: 2, meals: ["아침", "점심", "저녁"], theme: "pink", avoid: [], veg: false, quick: false, mild: false, korean: false, simple: false, week: null, checked: {} };
 try {
   const s = JSON.parse(localStorage.getItem(KEY));
   if (s && typeof s === "object") state = Object.assign(state, s);
 } catch (e) {}
 function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+
+const THEMES = [["pink", "🌸 핑크"], ["dark", "🌙 다크"], ["cream", "🧈 크림"], ["retro", "🕹️ 레트로"]];
+if (!THEMES.some(t => t[0] === state.theme)) state.theme = "pink";
+function applyTheme() {
+  if (state.theme === "pink") document.documentElement.removeAttribute("data-theme");
+  else document.documentElement.setAttribute("data-theme", state.theme);
+}
+applyTheme();
 
 function toast(msg) {
   const t = $("toast"); t.textContent = msg; t.classList.add("show");
@@ -220,6 +261,13 @@ function toast(msg) {
 }
 
 // ---------- 설정 화면 ----------
+THEMES.forEach(([key, label]) => {
+  const l = document.createElement("label"); l.className = "chip";
+  const i = document.createElement("input"); i.type = "radio"; i.name = "theme"; i.value = key; i.checked = state.theme === key;
+  const s = document.createElement("span"); s.textContent = label;
+  i.addEventListener("change", () => { state.theme = key; applyTheme(); save(); });
+  l.append(i, s); $("themeChips").appendChild(l);
+});
 for (let i = 1; i <= 6; i++) { const o = document.createElement("option"); o.value = i; o.textContent = i + "명"; $("people").appendChild(o); }
 $("people").value = state.people;
 
