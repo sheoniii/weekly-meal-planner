@@ -141,8 +141,34 @@
   .shop label.checked .n { text-decoration: line-through; color: var(--muted); }
   .empty { text-align: center; color: var(--muted); padding: 24px 0; }
   .foot { font-size: 12px; color: var(--bgmuted); text-align: center; line-height: 1.6; }
+  .pickers { display: grid; gap: 8px; margin-bottom: 14px; }
+  button.picker {
+    display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; font: inherit; color: var(--text);
+    background: var(--soft); border: 2px solid var(--pink-soft); border-radius: var(--r2); padding: 11px 14px; cursor: pointer;
+    transition: border-color .15s, background .15s;
+  }
+  button.picker:hover, button.picker:focus-visible { border-color: var(--pink); outline: none; }
+  button.picker .pl { font-weight: 700; flex: none; }
+  button.picker .ps { flex: 1; min-width: 0; text-align: right; color: var(--muted); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  button.picker.on .ps { color: var(--pink-dark); font-weight: 700; }
+  button.picker .pc { flex: none; color: var(--muted); }
+  .modal {
+    position: fixed; inset: 0; background: rgba(0,0,0,.45); display: flex; align-items: flex-end; justify-content: center;
+    z-index: 50; padding: 0;
+  }
+  .modal[hidden] { display: none; }
+  .sheet {
+    background: var(--card); color: var(--text); width: 100%; max-width: 560px; max-height: 85vh; overflow: auto;
+    border-radius: var(--r) var(--r) 0 0; padding: 18px 18px 22px; border: var(--card-border);
+    box-shadow: 0 -6px 24px rgba(0,0,0,.25);
+  }
+  @media (min-width: 640px) { .modal { align-items: center; padding: 20px; } .sheet { border-radius: var(--r); } }
+  .sheet-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .sheet-head h3 { margin: 0; font-size: 18px; color: var(--pink-dark); }
+  button.x { border: 0; background: transparent; color: var(--muted); font-size: 20px; cursor: pointer; padding: 4px 8px; }
+  .sheet-body { margin-bottom: 16px; }
   .toast {
-    position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--pink-dark);
+    z-index: 60; position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--pink-dark);
     color: #fff; padding: 10px 18px; border-radius: 99px; font-size: 14px; opacity: 0; pointer-events: none;
     transition: opacity .3s;
   }
@@ -155,33 +181,35 @@
   <div class="sub">조건만 고르면 일주일 식단과 장보기 목록을 만들어 드려요</div>
 
   <div class="card">
-    <h2>🎨 테마</h2>
-    <div class="chips" id="themeChips"></div>
+    <h2>어떤 식단이 좋아요?</h2>
+    <div class="pickers" id="pickers"></div>
+    <button class="main" id="make">식단 짜기 🍽️</button>
   </div>
 
-  <div class="card">
-    <h2>어떤 식단이 좋아요?</h2>
-    <div class="field">
-      <span class="label">몇 명이 먹나요?</span>
+  <div class="panes" hidden>
+    <div class="pane" id="pane-theme" data-auto="1">
+      <div class="chips" id="themeChips"></div>
+    </div>
+    <div class="pane" id="pane-people" data-auto="1">
       <select id="people"></select>
     </div>
-    <div class="field">
-      <span class="label">끼니 선택</span>
+    <div class="pane" id="pane-meals">
       <div class="chips" id="mealChips"></div>
+      <div class="note">먹고 싶은 끼니를 모두 골라 주세요.</div>
     </div>
-    <div class="field">
-      <span class="label">배달·외식은 일주일에 몇 번? (나머지는 직접 해먹기)</span>
+    <div class="pane" id="pane-delivery">
+      <span class="label">일주일에 몇 번? (나머지는 직접 해먹기)</span>
       <select id="delivery"></select>
-      <div class="chips" id="deliveryMeal" style="margin-top:8px"></div>
+      <span class="label" style="margin-top:12px">어느 끼니에 시킬까요?</span>
+      <div class="chips" id="deliveryMeal"></div>
       <div class="note">정한 횟수만큼 배달·외식 메뉴를 추천해요. 배달 끼니는 장보기 목록에 들어가지 않아요. 고른 끼니가 없으면 선택한 첫 끼니로 해요.</div>
       <div class="note">배달·외식 음식은 대부분 짜서, <b>저염·고혈압 참고</b>를 켜면 샐러드류만 추천해요.</div>
     </div>
-    <div class="field">
-      <span class="label">못 먹는 재료 (골라 주세요)</span>
+    <div class="pane" id="pane-avoid">
       <div class="chips" id="avoidChips"></div>
+      <div class="note">알레르기가 있다면 재료를 꼭 직접 확인해 주세요.</div>
     </div>
-    <div class="field">
-      <span class="label">🎯 식단 목적</span>
+    <div class="pane" id="pane-goal">
       <div class="chips">
         <label class="chip"><input type="checkbox" id="light"><span>🥗 가벼운 식단(다이어트)</span></label>
         <label class="chip"><input type="checkbox" id="protein"><span>💪 단백질 위주</span></label>
@@ -190,7 +218,11 @@
         <label class="chip"><input type="checkbox" id="bp"><span>🩺 고혈압 참고</span></label>
         <label class="chip"><input type="checkbox" id="chol"><span>🩺 콜레스테롤 참고</span></label>
       </div>
-      <span class="label" style="margin-top:12px">🥬 식성·몸 상태</span>
+      <div class="note">가벼운 식단과 단백질 위주는 메뉴를 재료 기준으로 나눈 참고용 분류예요. 칼로리와 영양 수치는 계산하지 않았어요.</div>
+      <div class="note">저염은 간이 약한 메뉴를 제가 직접 고른 목록이에요. 탄수화물 적게는 밥, 면, 빵, 감자류가 없는 메뉴만 골라요. 실제 나트륨과 탄수화물 양은 계산하지 않았어요.</div>
+      <div class="note">🩺 고혈압 참고는 저염 메뉴에서 치즈, 소스류까지 더 뺀 메뉴예요. 콜레스테롤 참고는 계란, 새우·오징어·조개, 돼지고기, 소고기, 베이컨, 치즈, 마요네즈가 든 메뉴를 뺀 메뉴예요. <b>치료용 식단이 아니라 재료 기준의 참고용이에요.</b> 질환이 있다면 의사나 영양사와 상의해서 정해 주세요.</div>
+    </div>
+    <div class="pane" id="pane-taste">
       <div class="chips">
         <label class="chip"><input type="checkbox" id="veg"><span>🥬 채식 위주</span></label>
         <label class="chip"><input type="checkbox" id="vegan"><span>🌱 비건에 가깝게</span></label>
@@ -199,7 +231,10 @@
         <label class="chip"><input type="checkbox" id="soft"><span>🧓 부드러운 음식</span></label>
         <label class="chip"><input type="checkbox" id="korean"><span>🍚 한식만</span></label>
       </div>
-      <span class="label" style="margin-top:12px">🍳 조리·비용</span>
+      <div class="note">채식 위주는 고기와 해산물만 빼요. 김치나 양념에 젓갈이 들어갈 수 있어요. 비건에 가깝게는 고기, 해산물, 계란, 유제품을 빼요(육수나 젓갈은 확인이 필요해요).</div>
+      <div class="note">아이와 함께는 안 매운 메뉴, 부드러운 음식은 죽·두부·계란·국처럼 씹기 편한 메뉴로 제가 나눈 분류예요.</div>
+    </div>
+    <div class="pane" id="pane-cook">
       <div class="chips">
         <label class="chip"><input type="checkbox" id="quick15"><span>⚡ 15분 이하 초간단</span></label>
         <label class="chip"><input type="checkbox" id="quick"><span>⏱️ 30분 이하만</span></label>
@@ -208,14 +243,19 @@
         <label class="chip"><input type="checkbox" id="nosoup"><span>🍽️ 국물 없는 메뉴</span></label>
         <label class="chip"><input type="checkbox" id="soup"><span>🍲 국물 요리 위주</span></label>
       </div>
-      <div class="note">채식 위주는 고기와 해산물만 빼요. 김치나 양념에 젓갈이 들어갈 수 있어요.</div>
-      <div class="note">재료 적은 메뉴는 필요한 재료가 4가지 이하인 메뉴예요. 알뜰 메뉴는 소고기와 해산물이 없고 재료가 5가지 이하인 메뉴예요. 비건에 가깝게는 고기, 해산물, 계란, 유제품을 빼요(육수나 젓갈은 확인이 필요해요).</div>
-      <div class="note">아이와 함께는 안 매운 메뉴, 부드러운 음식은 죽·두부·계란·국처럼 씹기 편한 메뉴로 제가 나눈 분류예요.</div>
-      <div class="note">가벼운 식단과 단백질 위주는 메뉴를 재료 기준으로 나눈 참고용 분류예요. 칼로리와 영양 수치는 계산하지 않았어요.</div>
-      <div class="note">저염은 국·찌개·면 요리와 김치, 된장, 어묵 같은 짠 재료가 든 메뉴를 빼요. 탄수화물 적게는 밥, 면, 빵, 감자류가 없는 메뉴만 골라요. 실제 나트륨과 탄수화물 양은 계산하지 않았어요.</div>
-      <div class="note">🩺 고혈압 참고는 저염 메뉴에서 치즈, 소스류까지 더 뺀 메뉴예요. 콜레스테롤 참고는 계란, 새우·오징어·조개, 돼지고기, 소고기, 베이컨, 치즈, 마요네즈가 든 메뉴를 뺀 메뉴예요. <b>치료용 식단이 아니라 재료 기준의 참고용이에요.</b> 질환이 있다면 의사나 영양사와 상의해서 정해 주세요.</div>
+      <div class="note">재료 적은 메뉴는 필요한 재료가 4가지 이하인 메뉴예요. 알뜰 메뉴는 소고기와 해산물이 없고 재료가 5가지 이하인 메뉴예요.</div>
     </div>
-    <button class="main" id="make">식단 짜기 🍽️</button>
+  </div>
+
+  <div class="modal" id="modal" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="sheet-head">
+        <h3 id="modalTitle"></h3>
+        <button type="button" class="x" id="modalClose" aria-label="닫기">✕</button>
+      </div>
+      <div class="sheet-body" id="modalBody"></div>
+      <button type="button" class="main" id="modalDone">선택 완료</button>
+    </div>
   </div>
 
   <div id="result"></div>
@@ -768,6 +808,58 @@ function fallbackCopy(text, done) {
   ta.select(); try { document.execCommand("copy"); done(); } catch (e) { toast("복사에 실패했어요"); }
   ta.remove();
 }
+
+// ---------- 선택 창 (누르면 열리고, 고르면 닫혀요) ----------
+const optLabel = k => { const el = $(k); return el && el.nextElementSibling ? el.nextElementSibling.textContent.replace(/^\S+\s/, "") : k; };
+const listOn = keys => { const on = keys.filter(k => state[k]).map(optLabel); return on.length ? on.join(", ") : "선택 안 함"; };
+const PICKERS = [
+  { pane: "pane-theme", label: "🎨 테마", title: "🎨 테마", sum: () => { const t = THEMES.find(x => x[0] === state.theme); return t ? t[1].replace(/^\S+\s/, "") : ""; } },
+  { pane: "pane-people", label: "👥 인원", title: "👥 몇 명이 먹나요?", sum: () => state.people + "명" },
+  { pane: "pane-meals", label: "🍽️ 끼니", title: "🍽️ 끼니 선택", sum: () => state.meals.length ? state.meals.join("·") : "선택 없음" },
+  { pane: "pane-delivery", label: "🛵 배달·외식", title: "🛵 배달·외식", sum: () => Number(state.delivery) ? `주 ${state.delivery}번 (${state.deliveryMeal})` : "없음 (모두 직접)", on: () => Number(state.delivery) > 0 },
+  { pane: "pane-avoid", label: "🚫 못 먹는 재료", title: "🚫 못 먹는 재료", sum: () => state.avoid.length ? state.avoid.map(a => LABEL[a] || a).join(", ") : "없음", on: () => state.avoid.length > 0 },
+  { pane: "pane-goal", label: "🎯 식단 목적", title: "🎯 식단 목적", keys: ["light", "protein", "lowsalt", "lowcarb", "bp", "chol"] },
+  { pane: "pane-taste", label: "🥬 식성·몸 상태", title: "🥬 식성·몸 상태", keys: ["veg", "vegan", "mild", "kid", "soft", "korean"] },
+  { pane: "pane-cook", label: "🍳 조리·비용", title: "🍳 조리·비용", keys: ["quick15", "quick", "simple", "cheap", "nosoup", "soup"] }
+];
+let openPicker = null;
+function renderPickers() {
+  const box = $("pickers"); box.innerHTML = "";
+  PICKERS.forEach(p => {
+    const b = document.createElement("button"); b.type = "button"; b.className = "picker";
+    const text = p.keys ? listOn(p.keys) : p.sum();
+    const isOn = p.keys ? p.keys.some(k => state[k]) : (p.on ? p.on() : false);
+    if (isOn) b.classList.add("on");
+    const l = document.createElement("span"); l.className = "pl"; l.textContent = p.label;
+    const s = document.createElement("span"); s.className = "ps"; s.textContent = text;
+    const c = document.createElement("span"); c.className = "pc"; c.textContent = "›";
+    b.append(l, s, c);
+    b.addEventListener("click", () => openPane(p));
+    box.appendChild(b);
+  });
+}
+function openPane(p) {
+  $("modalTitle").textContent = p.title;
+  $("modalBody").appendChild($(p.pane));
+  $("modal").hidden = false;
+  document.body.style.overflow = "hidden";
+  openPicker = p;
+  $("modalDone").focus();
+}
+function closeModal() {
+  if (!openPicker) return;
+  document.querySelector(".panes").appendChild($(openPicker.pane));
+  $("modal").hidden = true;
+  document.body.style.overflow = "";
+  openPicker = null;
+  renderPickers();
+}
+["pane-theme", "pane-people"].forEach(id => $(id).addEventListener("change", () => closeModal()));
+$("modalDone").addEventListener("click", closeModal);
+$("modalClose").addEventListener("click", closeModal);
+$("modal").addEventListener("click", e => { if (e.target === $("modal")) closeModal(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
+renderPickers();
 
 $("make").addEventListener("click", makeWeek);
 render();
