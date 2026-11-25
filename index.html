@@ -22,11 +22,46 @@
     --shadow: 0 4px 14px rgba(0,0,0,.45);
   }
   :root[data-theme="cream"] {
+    --bg: #fff8e1; --card: #fffdf7; --pink: #f6cf6a; --pink-dark: #9a6b12;
+    --pink-soft: #f3e4b8; --text: #5b4a2b; --muted: #a08c63;
+    --soft: #fff4d1; --input-bg: #fffef9; --on-pink: #5b3d00; --avoid: #d1603d;
+    --title: #a8741a; --bgmuted: #a08c63; --hover: #fbe7a6;
+    --shadow: 0 4px 14px rgba(230,190,90,.3);
+  }
+  :root[data-theme="mocha"] {
     --bg: #f7efe2; --card: #fffaf0; --pink: #c98a4b; --pink-dark: #8a5a2b;
     --pink-soft: #ecdcc3; --text: #4a3524; --muted: #9a8068;
     --soft: #f6ecda; --input-bg: #fffdf6; --on-pink: #ffffff; --avoid: #b5543c;
     --title: #8a5a2b; --bgmuted: #9a8068; --hover: #ecdcc3;
     --shadow: 0 4px 14px rgba(138,90,43,.18);
+  }
+  :root[data-theme="mint"] {
+    --bg: #e9fbf3; --card: #ffffff; --pink: #4cc9a0; --pink-dark: #1f8f6b;
+    --pink-soft: #c9f0e0; --text: #1f4a3d; --muted: #6b9a8b;
+    --soft: #f2fcf8; --input-bg: #f9fffc; --on-pink: #06382a; --avoid: #e0645a;
+    --title: #1f8f6b; --bgmuted: #6b9a8b; --hover: #c9f0e0;
+    --shadow: 0 4px 14px rgba(76,201,160,.25);
+  }
+  :root[data-theme="sky"] {
+    --bg: #eaf4ff; --card: #ffffff; --pink: #5aa9ff; --pink-dark: #1f6fcf;
+    --pink-soft: #cfe4ff; --text: #1f3552; --muted: #6f8aa8;
+    --soft: #f3f8ff; --input-bg: #f9fcff; --on-pink: #06213f; --avoid: #e0645a;
+    --title: #1f6fcf; --bgmuted: #6f8aa8; --hover: #cfe4ff;
+    --shadow: 0 4px 14px rgba(90,169,255,.25);
+  }
+  :root[data-theme="lavender"] {
+    --bg: #f3edff; --card: #ffffff; --pink: #a98bff; --pink-dark: #6a45d6;
+    --pink-soft: #e2d6ff; --text: #3a2d5c; --muted: #8a7bb0;
+    --soft: #f8f4ff; --input-bg: #fcfaff; --on-pink: #240f5c; --avoid: #e0507a;
+    --title: #6a45d6; --bgmuted: #8a7bb0; --hover: #e2d6ff;
+    --shadow: 0 4px 14px rgba(169,139,255,.25);
+  }
+  :root[data-theme="peach"] {
+    --bg: #fff1e8; --card: #ffffff; --pink: #ff9f7a; --pink-dark: #d4572a;
+    --pink-soft: #ffdccb; --text: #5a2f20; --muted: #b08070;
+    --soft: #fff7f2; --input-bg: #fffaf7; --on-pink: #4a1a08; --avoid: #d03a4a;
+    --title: #d4572a; --bgmuted: #b08070; --hover: #ffdccb;
+    --shadow: 0 4px 14px rgba(255,159,122,.28);
   }
   :root[data-theme="retro"] {
     --bg: #20204a; --card: #fef3c7; --pink: #ff4f81; --pink-dark: #b0124f;
@@ -67,6 +102,7 @@
   .chip input:checked + span { background: var(--pink); border-color: var(--pink); color: var(--on-pink); font-weight: 700; }
   .chip input:focus-visible + span { outline: 2px solid var(--pink-dark); outline-offset: 2px; }
   .chip.avoid input:checked + span { background: var(--avoid); border-color: var(--avoid); color: #fff; }
+  .dot { display: inline-block; width: 11px; height: 11px; border-radius: 50%; margin-left: 7px; vertical-align: middle; border: 1px solid rgba(0,0,0,.2); }
   .note { font-size: 12px; color: var(--muted); margin-top: 4px; }
   button.main {
     width: 100%; border: var(--card-border); border-radius: var(--r2); padding: 14px; font: inherit; font-weight: 700; font-size: 17px;
@@ -294,7 +330,11 @@ try {
 } catch (e) {}
 function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
 
-const THEMES = [["pink", "🌸 핑크"], ["dark", "🌙 다크"], ["cream", "🧈 크림"], ["retro", "🕹️ 레트로"]];
+const THEMES = [
+  ["pink", "🌸 핑크", "#ff7eb6"], ["cream", "🧈 크림", "#f6cf6a"], ["mocha", "🍫 모카", "#c98a4b"],
+  ["mint", "🍃 민트", "#4cc9a0"], ["sky", "☁️ 하늘", "#5aa9ff"], ["lavender", "💜 라벤더", "#a98bff"],
+  ["peach", "🍑 복숭아", "#ff9f7a"], ["dark", "🌙 다크", "#2a2431"], ["retro", "🕹️ 레트로", "#ff4f81"]
+];
 if (!THEMES.some(t => t[0] === state.theme)) state.theme = "pink";
 function applyTheme() {
   if (state.theme === "pink") document.documentElement.removeAttribute("data-theme");
@@ -308,10 +348,12 @@ function toast(msg) {
 }
 
 // ---------- 설정 화면 ----------
-THEMES.forEach(([key, label]) => {
+THEMES.forEach(([key, label, color]) => {
   const l = document.createElement("label"); l.className = "chip";
   const i = document.createElement("input"); i.type = "radio"; i.name = "theme"; i.value = key; i.checked = state.theme === key;
   const s = document.createElement("span"); s.textContent = label;
+  const dot = document.createElement("i"); dot.className = "dot"; dot.style.background = color;
+  s.appendChild(dot);
   i.addEventListener("change", () => { state.theme = key; applyTheme(); save(); });
   l.append(i, s); $("themeChips").appendChild(l);
 });
