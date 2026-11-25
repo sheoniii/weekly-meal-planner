@@ -1020,6 +1020,9 @@ const PICKERS = [
   { pane: "pane-cook", label: "🍳 조리·비용", title: "🍳 조리·비용", keys: ["quick15", "quick", "simple", "cheap", "nosoup", "soup", "nofire", "lunchbox", "onebowl", "longcook"] }
 ];
 let openPicker = null;
+function setBackground(on) {
+  document.querySelectorAll(".wrap > :not(.modal):not(.panes)").forEach(el => { el.inert = on; });
+}
 function renderPickers() {
   const box = $("pickers"); box.innerHTML = "";
   PICKERS.forEach(p => {
@@ -1036,7 +1039,9 @@ function renderPickers() {
   });
 }
 function openPane(p) {
+  if (openPicker) document.querySelector(".panes").appendChild($(openPicker.pane)); // 이미 열린 창이 있으면 먼저 정리
   $("modalTitle").textContent = p.title;
+  setBackground(true); // 창이 열려 있는 동안 뒤쪽 화면은 눌리지 않게
   $("modalBody").appendChild($(p.pane));
   $("modal").hidden = false;
   document.body.style.overflow = "hidden";
@@ -1046,6 +1051,7 @@ function openPane(p) {
 function closeModal() {
   if (!openPicker) return;
   document.querySelector(".panes").appendChild($(openPicker.pane));
+  setBackground(false);
   $("modal").hidden = true;
   document.body.style.overflow = "";
   openPicker = null;
