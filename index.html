@@ -138,6 +138,8 @@
     <div class="field">
       <span class="label">옵션</span>
       <div class="chips">
+        <label class="chip"><input type="checkbox" id="light"><span>🥗 가벼운 식단(다이어트)</span></label>
+        <label class="chip"><input type="checkbox" id="protein"><span>💪 단백질 위주</span></label>
         <label class="chip"><input type="checkbox" id="veg"><span>🥬 채식 위주</span></label>
         <label class="chip"><input type="checkbox" id="quick"><span>⏱️ 30분 이하만</span></label>
         <label class="chip"><input type="checkbox" id="mild"><span>🌶️ 매운 음식 빼기</span></label>
@@ -146,6 +148,7 @@
       </div>
       <div class="note">채식 위주는 고기와 해산물만 빼요. 김치나 양념에 젓갈이 들어갈 수 있어요.</div>
       <div class="note">재료 적은 메뉴는 필요한 재료가 4가지 이하인 메뉴예요.</div>
+      <div class="note">가벼운 식단과 단백질 위주는 메뉴를 재료 기준으로 나눈 참고용 분류예요. 칼로리와 영양 수치는 계산하지 않았어요.</div>
     </div>
     <button class="main" id="make">식단 짜기 🍽️</button>
   </div>
@@ -213,6 +216,24 @@ const MENUS = [
   { n: "소고기무국", m: ["저녁"], t: 40, g: ["소고기"], i: [["소고기", 60, "g", "고"], ["무", 100, "g", "채"], ["쌀", 100, "g", "곡"]] },
   { n: "버섯덮밥", m: ["저녁"], t: 20, g: [], i: [["쌀", 100, "g", "곡"], ["버섯", 60, "g", "채"], ["양파", 40, "g", "채"]] }
 ];
+// 가벼운 식단·단백질 위주용 메뉴 추가
+MENUS.push(
+  { n: "두부 스크램블과 밥", m: ["아침"], t: 10, g: ["계란", "콩류"], i: [["두부", 100, "g", "양"], ["계란", 2, "개", "달"], ["대파", 10, "g", "채"], ["쌀", 100, "g", "곡"]] },
+  { n: "삶은 계란 샐러드", m: ["아침", "점심"], t: 15, g: ["계란"], i: [["계란", 2, "개", "달"], ["양상추", 60, "g", "채"], ["방울토마토", 5, "개", "채"]] },
+  { n: "닭가슴살 덮밥", m: ["점심"], t: 20, g: ["닭고기"], i: [["닭가슴살", 120, "g", "고"], ["쌀", 100, "g", "곡"], ["양파", 40, "g", "채"], ["대파", 10, "g", "채"]] },
+  { n: "연두부 샐러드", m: ["점심"], t: 10, g: ["콩류"], i: [["두부", 150, "g", "양"], ["양상추", 50, "g", "채"], ["방울토마토", 5, "개", "채"], ["드레싱", 20, "ml", "양"]] },
+  { n: "참치 샐러드", m: ["점심"], t: 10, g: ["해산물", "생선"], i: [["참치", 50, "g", "고"], ["양상추", 60, "g", "채"], ["방울토마토", 5, "개", "채"]] },
+  { n: "닭가슴살 야채볶음", m: ["저녁"], t: 25, g: ["닭고기"], i: [["닭가슴살", 150, "g", "고"], ["브로콜리", 60, "g", "채"], ["당근", 30, "g", "채"], ["쌀", 100, "g", "곡"]] },
+  { n: "두부스테이크", m: ["저녁"], t: 25, g: ["콩류"], i: [["두부", 150, "g", "양"], ["양파", 40, "g", "채"], ["양송이", 40, "g", "채"], ["쌀", 100, "g", "곡"]] },
+  { n: "소고기 샤브샤브", m: ["저녁"], t: 30, g: ["소고기"], i: [["소고기", 100, "g", "고"], ["배추", 80, "g", "채"], ["버섯", 40, "g", "채"], ["쌀", 100, "g", "곡"]] }
+);
+const LIGHT = new Set(["요거트볼", "바나나 오트밀", "된장국과 밥", "미역국과 밥", "고구마와 우유", "두부 스크램블과 밥", "삶은 계란 샐러드",
+  "닭가슴살 샐러드", "콩나물비빔밥", "계란밥", "잔치국수", "연두부 샐러드", "참치 샐러드",
+  "된장찌개", "두부조림", "고등어구이", "계란말이와 시금치나물", "감자채볶음 정식", "소고기무국", "버섯덮밥", "어묵탕", "닭가슴살 야채볶음", "두부스테이크"]);
+const PROTEIN = new Set(["계란토스트", "계란밥", "요거트볼", "미역국과 밥", "두부 스크램블과 밥", "삶은 계란 샐러드",
+  "닭가슴살 샐러드", "참치마요덮밥", "콩나물비빔밥", "새우볶음밥", "샌드위치", "닭가슴살 덮밥", "연두부 샐러드", "참치 샐러드",
+  "제육볶음", "김치찌개", "닭볶음탕", "불고기", "고등어구이", "두부조림", "계란말이와 시금치나물", "오징어볶음", "순두부찌개", "닭갈비",
+  "비빔밥", "두부김치", "소고기무국", "닭가슴살 야채볶음", "두부스테이크", "소고기 샤브샤브"]);
 // 추가 정보: g 추가 분류, spicy 매운 음식, w 양식(한식 아님)
 const EXTRA = {
   "계란토스트": { g: ["밀가루"], w: 1 }, "요거트볼": { w: 1 }, "시리얼과 우유": { g: ["밀가루"], w: 1 },
@@ -225,12 +246,14 @@ const EXTRA = {
   "닭볶음탕": { spicy: 1 }, "고등어구이": { g: ["생선"] }, "두부조림": { g: ["콩류"] },
   "오징어볶음": { spicy: 1, g: ["새우·조개"] }, "순두부찌개": { spicy: 1, g: ["콩류", "새우·조개"] },
   "닭갈비": { spicy: 1 }, "비빔밥": { spicy: 1, g: ["콩류"] }, "두부김치": { spicy: 1, g: ["콩류"] },
+  "삶은 계란 샐러드": { w: 1 }, "연두부 샐러드": { w: 1 }, "참치 샐러드": { w: 1 },
   "토마토파스타": { g: ["밀가루"], w: 1 }, "크림파스타": { g: ["밀가루"], w: 1 }, "어묵탕": { g: ["생선", "밀가루"] }
 };
 MENUS.forEach(m => {
   const e = EXTRA[m.n] || {};
   if (e.g) m.g = m.g.concat(e.g);
   m.spicy = !!e.spicy; m.w = !!e.w;
+  m.light = LIGHT.has(m.n); m.protein = PROTEIN.has(m.n);
 });
 const BY_NAME = Object.fromEntries(MENUS.map(m => [m.n, m]));
 
@@ -240,7 +263,7 @@ const pad = n => String(n).padStart(2, "0");
 const toISO = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 const fmtDate = iso => { const [y, m, d] = iso.split("-").map(Number); return `${m}/${d} (${days[new Date(y, m - 1, d).getDay()]})`; };
 
-let state = { people: 2, meals: ["아침", "점심", "저녁"], theme: "pink", avoid: [], veg: false, quick: false, mild: false, korean: false, simple: false, week: null, checked: {} };
+let state = { people: 2, meals: ["아침", "점심", "저녁"], theme: "pink", avoid: [], veg: false, quick: false, mild: false, korean: false, simple: false, light: false, protein: false, week: null, checked: {} };
 try {
   const s = JSON.parse(localStorage.getItem(KEY));
   if (s && typeof s === "object") state = Object.assign(state, s);
@@ -286,7 +309,7 @@ AVOID.forEach(a => makeChip($("avoidChips"), LABEL[a] || a, state.avoid.includes
   state.avoid = on ? [...state.avoid, a] : state.avoid.filter(x => x !== a); save();
 }, "avoid"));
 $("veg").checked = state.veg; $("quick").checked = state.quick;
-["veg", "quick", "mild", "korean", "simple"].forEach(k => {
+["veg", "quick", "mild", "korean", "simple", "light", "protein"].forEach(k => {
   $(k).checked = !!state[k];
   $(k).addEventListener("change", e => { state[k] = e.target.checked; save(); });
 });
@@ -300,6 +323,8 @@ function allowed(m) {
   if (state.mild && m.spicy) return false;
   if (state.korean && m.w) return false;
   if (state.simple && m.i.length > 4) return false;
+  if (state.light && !m.light) return false;
+  if (state.protein && !m.protein) return false;
   return true;
 }
 const pool = meal => MENUS.filter(m => m.m.includes(meal) && allowed(m));
